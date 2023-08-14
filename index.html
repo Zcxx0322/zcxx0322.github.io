@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.20">
 <meta name="author" content="张崇鑫">
-<title>Ceph集群部署实战</title>
+<title>系统工程师实战</title>
 <style>
 /*! normalize.css v2.1.2 | MIT License | git.io/normalize */
 /* ========================================================================== HTML5 display definitions ========================================================================== */
@@ -748,7 +748,7 @@ p { margin-bottom: 1.25rem; }
 </head>
 <body class="book toc2 toc-left">
 <div id="header">
-<h1>Ceph集群部署实战</h1>
+<h1>系统工程师实战</h1>
 <div class="details">
 <span id="author" class="author">张崇鑫</span><br>
 <span id="email" class="email"><a href="mailto:colampszcx@gmail.com">colampszcx@gmail.com</a></span><br>
@@ -758,7 +758,23 @@ p { margin-bottom: 1.25rem; }
 <ul class="sectlevel1">
 <li><a href="#_Ceph_chapter">1. Ceph</a>
 <ul class="sectlevel2">
-<li><a href="#_centos_stream9安装配置">1.1. CentOS Stream9安装配置</a></li>
+<li><a href="#_ceph_cluster部署">1.1. Ceph Cluster部署</a>
+<ul class="sectlevel3">
+<li><a href="#_必要软件安装">1.1.1. 必要软件安装</a></li>
+<li><a href="#_初始化ceph管理节点">1.1.2. 初始化Ceph管理节点。</a></li>
+<li><a href="#_查看ceph版本和状态">1.1.3. 查看Ceph版本和状态</a></li>
+<li><a href="#_获取ceph集群状态概览">1.1.4. 获取Ceph集群状态概览</a></li>
+<li><a href="#_获取ceph集群公钥">1.1.5. 获取Ceph集群公钥</a></li>
+<li><a href="#_复制ceph集群公钥">1.1.6. 复制Ceph集群公钥</a></li>
+<li><a href="#_主机添加到ceph管理">1.1.7. 主机添加到Ceph管理</a></li>
+<li><a href="#_主机添加monitor标签">1.1.8. 主机添加Monitor标签</a></li>
+</ul>
+</li>
+<li><a href="#_cephfs部署">1.2. CephFS部署</a>
+<ul class="sectlevel3">
+<li><a href="#_挂载ceph集群">1.2.1. 挂载ceph集群</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -769,18 +785,227 @@ p { margin-bottom: 1.25rem; }
 <h2 id="_Ceph_chapter">1. Ceph</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><strong>基于 CentOS Strem9</strong></p>
+<p><strong>基于 CentOS Stream9</strong></p>
 </div>
 <div class="sect2">
-<h3 id="_centos_stream9安装配置">1.1. CentOS Stream9安装配置</h3>
-<div style="page-break-after: always;"></div>
+<h3 id="_ceph_cluster部署">1.1. Ceph Cluster部署</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Ceph Cluster部分包含三台虚拟机:node01 mpde02 node03
+</td>
+</tr>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_必要软件安装">1.1.1. 必要软件安装</h4>
+<div class="listingblock">
+<div class="title">三台虚拟机都需要进行操作</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#EPEL镜像设置
+dnf install -y epel-release
+
+#安装时间同步工具
+dnf install -y systemd-timesyncd
+#设置时间同步开机启动并立即启动
+systemctl enable systemd-timesyncd --now
+
+#配置Ceph软件仓库
+rpm -Uvh https://download.ceph.com/rpm-18.1.3/el9/noarch/ceph-release-1-1.el9.noarch.rpm
+
+#安装ceph-common
+dnf install -y  ceph-common
+
+#安装cephadm &amp; podman
+dnf install -y cephadm podman
+
+#安装 centos-release-ceph-pacific
+dnf install -y centos-release-ceph-pacific</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_初始化ceph管理节点">1.1.2. 初始化Ceph管理节点。</h4>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+这里我们以node01作为admin节点，所以接下来的操作全部可以在node01虚拟机操作即可
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cephadm bootstrap --mon-ip 192.168.122.91</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">控制台输出</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">URL: https://192.168.122.91:8443/
+User: admin
+Password: d41l878gd7</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_查看ceph版本和状态">1.1.3. 查看Ceph版本和状态</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">ceph -v
+ceph status</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_获取ceph集群状态概览">1.1.4. 获取Ceph集群状态概览</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">ceph -s</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_获取ceph集群公钥">1.1.5. 获取Ceph集群公钥</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">ceph cephadm get-pub-key &gt; ~/ceph.pub</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_复制ceph集群公钥">1.1.6. 复制Ceph集群公钥</h4>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+将上述生成的Ceph公钥复制到node02和node03服务器的root用户的~/.ssh/authorized_keys 文件中.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">ssh-copy-id -f -i ~/ceph.pub root@node02
+ssh-copy-id -f -i ~/ceph.pub root@node03</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_主机添加到ceph管理">1.1.7. 主机添加到Ceph管理</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cephadm shell -- ceph orch host add node01 192.168.122.91
+cephadm shell -- ceph orch host add node02 192.168.122.12
+cephadm shell -- ceph orch host add node03 192.168.122.212</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_主机添加monitor标签">1.1.8. 主机添加Monitor标签</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cephadm shell -- ceph orch host label add node01 mon
+cephadm shell -- ceph orch host label add node02 mon
+cephadm shell -- ceph orch host label add node03 mon</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_cephfs部署">1.2. CephFS部署</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#创建卷
+ceph fs volume create geek_cephfs  --placement=3
+
+#列出文件系统信息
+ceph fs ls
+
+#获取指定geek_cephfs卷的详细信息
+ceph fs volume info geek_cephfs
+
+#查看 Ceph 元数据服务器（MDS）的状态
+ceph mds stat
+
+#应用geek_cephfs卷的放置策略为3
+ceph orch apply mds geek_cephfs --placement=3</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+参照官网文档,链接:https://docs.ceph.com/en/latest/cephadm/services/mds/#orchestrator-cli-cephfs
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="title">查看ceph集群概况</div>
+<div class="content">
+<pre># [root@node01 ~]# ceph status
+#   cluster:
+#     id:     de382350-3221-11ee-bc03-525400b83c9a
+#     health: HEALTH_OK
+
+#   services:
+#     mon: 3 daemons, quorum node01,node02,node03 (age 9m)
+#     mgr: node01.vperxy(active, since 52m), standbys: node02.ldsnmd
+#     mds: 1/1 daemons up, 2 standby
+#     osd: 3 osds: 3 up (since 8m), 3 in (since 9m)
+
+#   data:
+#     volumes: 1/1 healthy
+#     pools:   3 pools, 49 pgs
+#     objects: 24 objects, 451 KiB
+#     usage:   81 MiB used, 90 GiB / 90 GiB avail
+#     pgs:     49 active+clean</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">查看key,为挂载集群做准备</div>
+<div class="content">
+<pre># [root@node01 ~]# cat /etc/ceph/ceph.client.admin.keyring
+# [client.admin]
+#	key = AQBXq9FkV9dFChAAazUqZkDlDMJu6Ym/frBBCQ==
+#	caps mds = "allow *"
+#	caps mgr = "allow *"
+#	caps mon = "allow *"
+#	caps osd = "allow *"</pre>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_挂载ceph集群">1.2.1. 挂载ceph集群</h4>
+<div class="listingblock">
+<div class="title">在任何主机执行挂载操作</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mkdir -p /mnt/ceph
+mount -t ceph 192.168.122.91:6789,192.168.122.12:6789,192.168.122.212:6789:/ /mnt/ceph -o name=admin,secret=AQBXq9FkV9dFChAAazUqZkDlDMJu6Ym/frBBCQ==</code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-08-09 17:16:57 +0800
+Last updated 2023-08-15 00:59:06 +0800
 </div>
 </div>
 <script src="js/highlight.min.js"></script>
