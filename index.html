@@ -758,23 +758,9 @@ p { margin-bottom: 1.25rem; }
 <ul class="sectlevel1">
 <li><a href="#_Ceph_chapter">1. Ceph</a>
 <ul class="sectlevel2">
-<li><a href="#_ceph_cluster部署">1.1. Ceph Cluster部署</a>
-<ul class="sectlevel3">
-<li><a href="#_必要软件安装">1.1.1. 必要软件安装</a></li>
-<li><a href="#_初始化ceph管理节点">1.1.2. 初始化Ceph管理节点。</a></li>
-<li><a href="#_查看ceph版本和状态">1.1.3. 查看Ceph版本和状态</a></li>
-<li><a href="#_获取ceph集群状态概览">1.1.4. 获取Ceph集群状态概览</a></li>
-<li><a href="#_获取ceph集群公钥">1.1.5. 获取Ceph集群公钥</a></li>
-<li><a href="#_复制ceph集群公钥">1.1.6. 复制Ceph集群公钥</a></li>
-<li><a href="#_主机添加到ceph管理">1.1.7. 主机添加到Ceph管理</a></li>
-<li><a href="#_主机添加monitor标签">1.1.8. 主机添加Monitor标签</a></li>
-</ul>
-</li>
-<li><a href="#_cephfs部署">1.2. CephFS部署</a>
-<ul class="sectlevel3">
-<li><a href="#_挂载ceph集群">1.2.1. 挂载ceph集群</a></li>
-</ul>
-</li>
+<li><a href="#_ceph_cluster部署">1.1. Ceph Cluster部署</a></li>
+<li><a href="#_cephfs部署">1.2. CephFS部署</a></li>
+<li><a href="#_cephrgw部署">1.3. CephRGW部署</a></li>
 </ul>
 </li>
 </ul>
@@ -804,7 +790,6 @@ Ceph Cluster部分包含三台虚拟机:node01 mpde02 node03
 <div class="sect3">
 <h4 id="_必要软件安装">1.1.1. 必要软件安装</h4>
 <div class="listingblock">
-<div class="title">三台虚拟机都需要进行操作</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#EPEL镜像设置
 dnf install -y epel-release
@@ -827,9 +812,21 @@ dnf install -y cephadm podman
 dnf install -y centos-release-ceph-pacific</code></pre>
 </div>
 </div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+以上操作三台虚拟机都需要进行
+</td>
+</tr>
+</table>
+</div>
 </div>
 <div class="sect3">
-<h4 id="_初始化ceph管理节点">1.1.2. 初始化Ceph管理节点。</h4>
+<h4 id="_集群配置">1.1.2. 集群配置</h4>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -837,7 +834,7 @@ dnf install -y centos-release-ceph-pacific</code></pre>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-这里我们以node01作为admin节点，所以接下来的操作全部可以在node01虚拟机操作即可
+以下操作均在node01进行
 </td>
 </tr>
 </table>
@@ -855,26 +852,30 @@ User: admin
 Password: d41l878gd7</code></pre>
 </div>
 </div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+以上输出请注意自行保存
+</td>
+</tr>
+</table>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_查看ceph版本和状态">1.1.3. 查看Ceph版本和状态</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">ceph -v
-ceph status</code></pre>
+ceph status &amp; ceph -s</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_获取ceph集群状态概览">1.1.4. 获取Ceph集群状态概览</h4>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">ceph -s</code></pre>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_获取ceph集群公钥">1.1.5. 获取Ceph集群公钥</h4>
+<h4 id="_获取ceph公钥">1.1.4. 获取Ceph公钥</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">ceph cephadm get-pub-key &gt; ~/ceph.pub</code></pre>
@@ -882,7 +883,7 @@ ceph status</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_复制ceph集群公钥">1.1.6. 复制Ceph集群公钥</h4>
+<h4 id="_复制ceph公钥">1.1.5. 复制Ceph公钥</h4>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -903,7 +904,7 @@ ssh-copy-id -f -i ~/ceph.pub root@node03</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_主机添加到ceph管理">1.1.7. 主机添加到Ceph管理</h4>
+<h4 id="_主机添加到ceph管理">1.1.6. 主机添加到Ceph管理</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cephadm shell -- ceph orch host add node01 192.168.122.91
@@ -913,7 +914,7 @@ cephadm shell -- ceph orch host add node03 192.168.122.212</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_主机添加monitor标签">1.1.8. 主机添加Monitor标签</h4>
+<h4 id="_各主机添加monitor标签">1.1.7. 各主机添加Monitor标签</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cephadm shell -- ceph orch host label add node01 mon
@@ -925,6 +926,8 @@ cephadm shell -- ceph orch host label add node03 mon</code></pre>
 </div>
 <div class="sect2">
 <h3 id="_cephfs部署">1.2. CephFS部署</h3>
+<div class="sect3">
+<h4 id="_cephfs配置">1.2.1. CephFs配置</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#创建卷
@@ -955,8 +958,10 @@ ceph orch apply mds geek_cephfs --placement=3</code></pre>
 </tr>
 </table>
 </div>
+</div>
+<div class="sect3">
+<h4 id="_查看ceph概况">1.2.2. 查看ceph概况</h4>
 <div class="listingblock">
-<div class="title">查看ceph集群概况</div>
 <div class="content">
 <pre># [root@node01 ~]# ceph status
 #   cluster:
@@ -973,12 +978,14 @@ ceph orch apply mds geek_cephfs --placement=3</code></pre>
 #     volumes: 1/1 healthy
 #     pools:   3 pools, 49 pgs
 #     objects: 24 objects, 451 KiB
-#     usage:   81 MiB used, 90 GiB / 90 GiB avail
+#     usage:   81 MiB used, 30 GiB / 30 GiB avail
 #     pgs:     49 active+clean</pre>
 </div>
 </div>
+</div>
+<div class="sect3">
+<h4 id="_查看key">1.2.3. 查看key</h4>
 <div class="listingblock">
-<div class="title">查看key,为挂载集群做准备</div>
 <div class="content">
 <pre># [root@node01 ~]# cat /etc/ceph/ceph.client.admin.keyring
 # [client.admin]
@@ -989,13 +996,148 @@ ceph orch apply mds geek_cephfs --placement=3</code></pre>
 #	caps osd = "allow *"</pre>
 </div>
 </div>
+</div>
 <div class="sect3">
-<h4 id="_挂载ceph集群">1.2.1. 挂载ceph集群</h4>
+<h4 id="_挂载ceph">1.2.4. 挂载Ceph</h4>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+可在任何主机执行挂载操作
+</td>
+</tr>
+</table>
+</div>
 <div class="listingblock">
-<div class="title">在任何主机执行挂载操作</div>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mkdir -p /mnt/ceph
 mount -t ceph 192.168.122.91:6789,192.168.122.12:6789,192.168.122.212:6789:/ /mnt/ceph -o name=admin,secret=AQBXq9FkV9dFChAAazUqZkDlDMJu6Ym/frBBCQ==</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_cephrgw部署">1.3. CephRGW部署</h3>
+<div class="sect3">
+<h4 id="_安装配置">1.3.1. 安装配置</h4>
+<div class="listingblock">
+<div class="title">安装ceph-radosgw</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">dnf install -y ceph-radosgw</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">主机添加rgw标签</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">ceph orch host label add node01 rgw
+ceph orch host label add node02 rgw
+ceph orch host label add node03 rgw</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">启动rgw</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">ceph orch apply rgw test_rgw default --placement=label:rgw --port=8000</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">测试链接rgw服务</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://node01:8000</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">创建账户</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bahs hljs" data-lang="bahs">radosgw-admin user create --uid=testuser --display-name=testuser --email=user@user.com</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+注意保存access_key和secret_key的值
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_s3">1.3.2. S3</h4>
+<div class="listingblock">
+<div class="title">安装s3cmd</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">yum install -y s3cmd</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">初始化</div>
+<div class="content">
+<pre># [root@node01 ~]# s3cmd --configure
+# Access Key: #输入access_key
+# Secret Key: #输入secret_key
+# Default Region: #default
+# S3 Endpoint: #192.168.122.91:8000
+# DNS-style bucket+hostname:port template for accessing a bucket: #node01
+# Encryption password: #回车
+# Path to GPG program: #回车
+# Use HTTPS protocol: #NO
+# HTTP Proxy server name: #回车
+# Test access with supplied credentials? #Y
+# Save settings? #Y</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">测试使用S3</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#创建桶
+s3cmd mb s3://testbucket
+
+#列出桶
+s3cmd ls</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_swift">1.3.3. swift</h4>
+<div class="listingblock">
+<div class="title">安装swiftclient</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">pip install python-swiftclient</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">创建swift子用户</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">radosgw-admin subuser create --uid=testuser --subuser=testuser:swift --access=full</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">常用swift操作命令</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#列出bucket
+swift -A http://192.168.122.91:8000/auth/1.0 -U testuser:swift -K NKcPIzH0YdowdrDEViYZhkpkNbAMD5GpDmRkGO0B list
+
+#创建bucket
+swift -A http://192.168.122.91:8000/auth/1.0 -U testuser:swift -K NKcPIzH0YdowdrDEViYZhkpkNbAMD5GpDmRkGO0B post bucketname
+
+#删除bucket
+swift -A http://192.168.122.91:8000/auth/1.0 -U testuser:swift -K NKcPIzH0YdowdrDEViYZhkpkNbAMD5GpDmRkGO0B delete bucketname
+
+#上传文件到指定bucket
+swift -A http://192.168.122.91:8000/auth/1.0 -U testuser:swift -K NKcPIzH0YdowdrDEViYZhkpkNbAMD5GpDmRkGO0B upload bucketname filename
+
+#从指定bucket下载文件到当前目录
+swift -A http://192.168.122.91:8000/auth/1.0 -U testuser:swift -K NKcPIzH0YdowdrDEViYZhkpkNbAMD5GpDmRkGO0B download bucketname filename
+
+#删除指定bucket内的指定文件
+swift -A http://192.168.122.91:8000/auth/1.0 -U testuser:swift -K NKcPIzH0YdowdrDEViYZhkpkNbAMD5GpDmRkGO0B delete bucketname filename</code></pre>
 </div>
 </div>
 </div>
@@ -1005,7 +1147,7 @@ mount -t ceph 192.168.122.91:6789,192.168.122.12:6789,192.168.122.212:6789:/ /mn
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-08-15 00:59:06 +0800
+Last updated 2023-08-15 20:36:41 +0800
 </div>
 </div>
 <script src="js/highlight.min.js"></script>
