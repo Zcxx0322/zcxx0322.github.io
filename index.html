@@ -789,8 +789,9 @@ p { margin-bottom: 1.25rem; }
 <li><a href="#_Git_chapter">2. Git</a>
 <ul class="sectlevel2">
 <li><a href="#_新建用户">2.1. 新建用户</a></li>
-<li><a href="#_添加用户ssh密钥">2.2. 添加用户SSH密钥</a></li>
-<li><a href="#_初始化裸仓库">2.3. 初始化裸仓库</a></li>
+<li><a href="#_添加开发者ssh密钥">2.2. 添加开发者SSH密钥</a></li>
+<li><a href="#_初始化空仓库">2.3. 初始化空仓库</a></li>
+<li><a href="#_使用git仓库">2.4. 使用Git仓库</a></li>
 </ul>
 </li>
 <li><a href="#_Gitlab_chapter">3. 内网搭建Gitlab</a>
@@ -1203,15 +1204,91 @@ swift -A http://192.168.122.91:8000/auth/1.0 -U testuser:swift -K NKcPIzH0Ydowdr
 </div>
 <div class="sect2">
 <h3 id="_新建用户">2.1. 新建用户</h3>
+<div class="paragraph">
+<p>创建一个操作系统用户 git，并为其建立一个 .ssh 目录</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#创建用户
+sudo adduser git
 
+#切换至git用户
+su git &amp;&amp; cd
+
+#为git用户目录创建.ssh文件
+mkdir  .ssh &amp;&amp; chmod 700 .ssh
+
+#创建authorized_keys文件，用以存储开发者的公钥
+touch .ssh/authorized_keys &amp;&amp; chmod 600 .ssh/authorized_keys</code></pre>
+</div>
+</div>
 </div>
 <div class="sect2">
-<h3 id="_添加用户ssh密钥">2.2. 添加用户SSH密钥</h3>
-
+<h3 id="_添加开发者ssh密钥">2.2. 添加开发者SSH密钥</h3>
+<div class="listingblock">
+<div class="title">开发工作机  用户：root</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cat ~/.ssh/id_rsa.pub</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">控制台输出</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCB007n/ww+ouN4gSLKssMxXnBOvf9LGt4L
+ojG6rs6hPB09j9R/T17/x4lhJA0F3FR1rP6kYBRsWj2aThGw6HXLm9/5zytK6Ztg3RPKK+4k
+Yjh6541NYsnEAZuXz0jTTyAUfrtU3Z5E003C4oxOj6H0rfIF1kKI9MAQLMdpGW1GYEIgS9Ez
+Sdfd8AcCIicTDWbqLAcU4UpkaX8KyGlLwsNuuGztobF8m72ALC/nLF6JLtPofwFBlgc+myiv
+O7TCUSBdLQlgMVOFq1I2uPWQOkOWQAHukEOmfjy2jctxSDBQ220ymjaNsHT4kgtZg2AYYgPq
+dAv8JggJICUvax2T9va5 root</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+将输出的公钥复制到git用户.ssh目录下的authorized_keys文件中，这样便达成了root用户无密码登陆git用户
+</td>
+</tr>
+</table>
+</div>
 </div>
 <div class="sect2">
-<h3 id="_初始化裸仓库">2.3. 初始化裸仓库</h3>
+<h3 id="_初始化空仓库">2.3. 初始化空仓库</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#新建一个专门放置仓库的目录
+mkdir git_repo &amp;&amp; cd git_repo
 
+#新建一个名为project的空仓库
+mkdir project.git &amp;&amp; cd project.git
+
+#初始化project空仓库
+git init --bare</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_使用git仓库">2.4. 使用Git仓库</h3>
+<div class="listingblock">
+<div class="title">开发工作机  用户:root</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">git clone git@serverip:/git_repo/project.git
+#警告：您似乎克隆了一个空仓库
+
+cd project
+
+vim README.md
+
+git add .
+
+git commit -m "add README file"
+
+git push origin master</code></pre>
+</div>
+</div>
 </div>
 </div>
 </div>
