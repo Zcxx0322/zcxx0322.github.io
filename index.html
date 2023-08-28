@@ -849,6 +849,14 @@ p { margin-bottom: 1.25rem; }
 <li><a href="#_访问">5.3.4. 访问</a></li>
 </ul>
 </li>
+<li><a href="#_安装mysql监控插件">5.4. 安装MySQL监控插件</a>
+<ul class="sectlevel3">
+<li><a href="#_安装mysql_exporter">5.4.1. 安装mysql_exporter</a></li>
+<li><a href="#_配置_3">5.4.2. 配置</a></li>
+<li><a href="#_启动_2">5.4.3. 启动</a></li>
+<li><a href="#_使用">5.4.4. 使用</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li><a href="#_Zabbix_chapter">6. Zabbix</a>
@@ -860,7 +868,7 @@ p { margin-bottom: 1.25rem; }
 <li><a href="#_安装必要软件_2">6.1.3. 安装必要软件</a></li>
 </ul>
 </li>
-<li><a href="#_配置_3">6.2. 配置</a>
+<li><a href="#_配置_4">6.2. 配置</a>
 <ul class="sectlevel3">
 <li><a href="#_创建初始数据库">6.2.1. 创建初始数据库</a></li>
 <li><a href="#_初始化">6.2.2. 初始化</a></li>
@@ -868,7 +876,7 @@ p { margin-bottom: 1.25rem; }
 <li><a href="#_为zabbix_server配置数据库">6.2.4. 为Zabbix Server配置数据库</a></li>
 </ul>
 </li>
-<li><a href="#_启动_2">6.3. 启动</a>
+<li><a href="#_启动_3">6.3. 启动</a>
 <ul class="sectlevel3">
 <li><a href="#_启动zabbix_server和agent进程">6.3.1. 启动Zabbix Server和agent进程</a></li>
 </ul>
@@ -1793,6 +1801,114 @@ ipaddress:9090</code></pre>
 </div>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_安装mysql监控插件">5.4. 安装MySQL监控插件</h3>
+<div class="sect3">
+<h4 id="_安装mysql_exporter">5.4.1. 安装mysql_exporter</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#下载
+wget -c https://github.com/prometheus/node_exporter/releases/download/v1.6.1/node_exporter-1.6.1.linux-amd64.tar.gz
+
+#解压
+tar zxvf mysqld_exporter-1.6.1.linux-amd64.tar.gz
+
+#移动到指定目录
+mv mysqld_exporter-1.6.1.linux-amd64 /usr/local/mysql_exporter
+
+cd /usr/local/mysql_exporter</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_配置_3">5.4.2. 配置</h4>
+<div class="paragraph">
+<p>登录mysql为exporter创建账号并授权</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#创建数据库用户
+mysql&gt; CREATE USER 'mysql_exporter'@'localhost' IDENTIFIED BY 'password';
+
+#给权限
+mysql&gt; GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'mysql_exporter'@'localhost';</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>创建mysql配置文件、运行时可免密码连接数据库</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">vim /usr/local/mysql_exporter/.my.cnf
+
+[client]
+user=mysql_exporter
+password=password</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_启动_2">5.4.3. 启动</h4>
+<div class="paragraph">
+<p>临时启动</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#注意此时在/usr/local/mysql_exporter目录下
+./mysqld_exporter --config.my-cnf=.my.cnf</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>创建服务启动</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cat &lt;&lt; EOF &gt; /etc/systemd/system/mysqld_exporter.service
+[Unit]
+Description=https://prometheus.io
+
+[Service]
+Restart=on-failureExecStart=/usr/local/mysql_exporter/mysqld_exporter --config.my-cnf=.my.cnf
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+#重载并启动
+systemctl daemon-reload
+systemctl restart mysql_exporter.service</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_使用">5.4.4. 使用</h4>
+<div class="paragraph">
+<p>使用prometheus监控修改监控端配置文件</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">vim ~/prometheus-2.46.0.linux-amd64/prometheus.yml
+
+#详细内容排列如下
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+    - targets: ['192.168.122.219:9090']
+
+  - job_name: 'mysql-001'
+    static_configs:
+    - targets: ['192.168.122.219:9104']
+
+    scrape_interval: 5s
+
+
+#完成配置后可重启服务
+systemctl restart prometheus
+systemctl restart mysqld_exporter</code></pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -1834,7 +1950,7 @@ dnf clean all</code></pre>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_配置_3">6.2. 配置</h3>
+<h3 id="_配置_4">6.2. 配置</h3>
 <div class="sect3">
 <h4 id="_创建初始数据库">6.2.1. 创建初始数据库</h4>
 <div class="paragraph">
@@ -1907,7 +2023,7 @@ DBPassword=password
 </div>
 </div>
 <div class="sect2">
-<h3 id="_启动_2">6.3. 启动</h3>
+<h3 id="_启动_3">6.3. 启动</h3>
 <div class="sect3">
 <h4 id="_启动zabbix_server和agent进程">6.3.1. 启动Zabbix Server和agent进程</h4>
 <div class="paragraph">
