@@ -818,7 +818,7 @@ p { margin-bottom: 1.25rem; }
 <li><a href="#_查看gitlab默认http端口">3.3.2. 查看GitLab默认HTTP端口</a></li>
 </ul>
 </li>
-<li><a href="#_为gitlab新增防火墙规则">3.4. 为GitLab新增防火墙规则</a></li>
+<li><a href="#_为gitlab新增防火墙规">3.4. 为GitLab新增防火墙规</a></li>
 <li><a href="#_gitlab管理维护gitlab_ctl">3.5. GitLab管理维护：gitlab-ctl</a>
 <ul class="sectlevel3">
 <li><a href="#_gitlab_ctl命令参数">3.5.1. gitlab-ctl命令参数</a></li>
@@ -879,6 +879,44 @@ p { margin-bottom: 1.25rem; }
 <li><a href="#_启动_3">6.3. 启动</a>
 <ul class="sectlevel3">
 <li><a href="#_启动zabbix_server和agent进程">6.3.1. 启动Zabbix Server和agent进程</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_Jenkins_chapter">7. Jenkins</a>
+<ul class="sectlevel2">
+<li><a href="#_新增jenkins_yum仓库">7.1. 新增Jenkins Yum仓库</a>
+<ul class="sectlevel3">
+<li><a href="#_下载仓库文件">7.1.1. 下载仓库文件</a></li>
+<li><a href="#_导入仓库密钥">7.1.2. 导入仓库密钥</a></li>
+<li><a href="#_默认禁用jenkins仓库">7.1.3. 默认禁用Jenkins仓库</a></li>
+</ul>
+</li>
+<li><a href="#_安装jenkins软件包">7.2. 安装Jenkins软件包</a>
+<ul class="sectlevel3">
+<li><a href="#_安装依赖">7.2.1. 安装依赖</a></li>
+<li><a href="#_安装jenkins">7.2.2. 安装jenkins</a></li>
+</ul>
+</li>
+<li><a href="#_配置jenkins服务">7.3. 配置Jenkins服务</a>
+<ul class="sectlevel3">
+<li><a href="#_开机启动jenkins">7.3.1. 开机启动Jenkins</a></li>
+<li><a href="#_设置jenkins启动参数">7.3.2. 设置Jenkins启动参数</a></li>
+</ul>
+</li>
+<li><a href="#_为jenkins新增防火墙规则">7.4. 为Jenkins新增防火墙规则</a></li>
+<li><a href="#_启动jenkins">7.5. 启动Jenkins</a></li>
+<li><a href="#_第一次访问jenkins_web">7.6. 第一次访问Jenkins Web</a>
+<ul class="sectlevel3">
+<li><a href="#_获取初始管理员密码">7.6.1. 获取初始管理员密码</a></li>
+<li><a href="#_访问jenkins_web">7.6.2. 访问Jenkins Web</a></li>
+<li><a href="#_解锁jenkins">7.6.3. 解锁Jenkins</a></li>
+<li><a href="#_选择插件">7.6.4. 选择插件</a></li>
+<li><a href="#_安装插件">7.6.5. 安装插件</a></li>
+<li><a href="#_创建第一个管理员用户">7.6.6. 创建第一个管理员用户</a></li>
+<li><a href="#_配置url">7.6.7. 配置URL</a></li>
+<li><a href="#_配置完成">7.6.8. 配置完成</a></li>
+<li><a href="#_jenkins首页">7.6.9. Jenkins首页</a></li>
 </ul>
 </li>
 </ul>
@@ -1522,10 +1560,10 @@ gitlab-ctl status</code></pre>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_为gitlab新增防火墙规则">3.4. 为GitLab新增防火墙规则</h3>
+<h3 id="_为gitlab新增防火墙规">3.4. 为GitLab新增防火墙规</h3>
 <div class="paragraph">
-<p>增加防火墙放行规则
-.位置：内网服务器，用户：root</p>
+<div class="title">位置：内网服务器，用户：root</div>
+<p>增加防火墙放行规则</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1542,8 +1580,8 @@ firewall-cmd ${PERM} --add-service=${SERV_NAME}</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>重载防火墙配置
-.位置：内网服务器，用户：root</p>
+<div class="title">位置：内网服务器，用户：root</div>
+<p>重载防火墙配置</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1551,8 +1589,8 @@ firewall-cmd ${PERM} --add-service=${SERV_NAME}</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>查看防火墙规则
-.位置：内网服务器，用户：root</p>
+<div class="title">位置：内网服务器，用户：root</div>
+<p>查看防火墙规则</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1663,9 +1701,17 @@ sudo pacman -S android-sdk</code></pre>
 </td>
 <td class="content">
 安装android-sdk这一步也可以在安装android-studio成功后进行
+=== 常用命令
 </td>
 </tr>
 </table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">flutter doctor
+
+flutter devices</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -2040,10 +2086,295 @@ systemctl enable zabbix-server zabbix-agent httpd php-fpm</code></pre>
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_Jenkins_chapter">7. Jenkins</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>基于 CentOS Stream9</strong></p>
+</div>
+<div class="sect2">
+<h3 id="_新增jenkins_yum仓库">7.1. 新增Jenkins Yum仓库</h3>
+<div class="sect3">
+<h4 id="_下载仓库文件">7.1.1. 下载仓库文件</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">wget \
+  --inet4-only \
+  -O /etc/yum.repos.d/jenkins.repo \
+  https://pkg.jenkins.io/redhat-stable/jenkins.repo</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_导入仓库密钥">7.1.2. 导入仓库密钥</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#下载密钥文件
+wget -O /etc/pki/rpm-gpg/RPM-GPG-KEY-JENKINS https://pkg.jenkins.io/redhat/jenkins.io.key
+
+#导入密钥
+rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-JENKINS</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_默认禁用jenkins仓库">7.1.3. 默认禁用Jenkins仓库</h4>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Jenkins仓库（服务器位于国外）经常无法访问或者速度慢，影响Yum使用，默认禁用之
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">yum-config-manager --disable jenkins | egrep '(\[jenkins\])|enabled'</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_安装jenkins软件包">7.2. 安装Jenkins软件包</h3>
+<div class="sect3">
+<h4 id="_安装依赖">7.2.1. 安装依赖</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#安装Java11
+yum install -y java-11-openjdk java-11-openjdk-devel java-11-openjdk-headless
+
+#设置系统默认Java
+alternatives --set java `ls /usr/lib/jvm/java-11-openjdk-*/bin/java`
+alternatives --set javac `ls /usr/lib/jvm/java-11-openjdk-*/bin/javac`
+alternatives --set jre_openjdk `ls -d /usr/lib/jvm/java-11-openjdk-*`
+alternatives --set java_sdk_openjdk `ls -d /usr/lib/jvm/java-11-openjdk-*`
+
+#查看Java版本
+java -version</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_安装jenkins">7.2.2. 安装jenkins</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">yum --disablerepo=\* --enablerepo=jenkins install jenkins</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_配置jenkins服务">7.3. 配置Jenkins服务</h3>
+<div class="sect3">
+<h4 id="_开机启动jenkins">7.3.1. 开机启动Jenkins</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">systemctl enable jenkins</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_设置jenkins启动参数">7.3.2. 设置Jenkins启动参数</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#创建Systemd配置文件
+
+mkdir -p /etc/systemd/system/jenkins.service.d/
+
+cat &lt;&lt; EOF &gt; /etc/systemd/system/jenkins.service.d/override.conf
+[Service]
+Environment="JENKINS_PORT=8282"
+# 默认配置文件中的 %C 实际并未生效，而是出现了错误的 "/var/lib/jenkins/%C/jenkins/"
+Environment="JENKINS_WEBROOT=/var/cache/jenkins/war"
+Environment="JENKINS_LOG=/var/log/jenkins/jenkins.log"
+EOF
+
+#重载Systemd配置
+systemctl daemon-reload</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_为jenkins新增防火墙规则">7.4. 为Jenkins新增防火墙规则</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#增加防火墙放行规则
+JENKINS_PORT=8282
+PERM="--permanent"
+SERV_NAME=jenkins_${JENKINS_PORT}
+SERV="${PERM} --service=${SERV_NAME}"
+
+firewall-cmd ${PERM} --new-service=${SERV_NAME}
+firewall-cmd ${SERV} --set-short="Jenkins ports"
+firewall-cmd ${SERV} --set-description="Jenkins port exceptions"
+firewall-cmd ${SERV} --add-port=${JENKINS_PORT}/tcp
+firewall-cmd ${PERM} --add-service=${SERV_NAME}
+
+#重载防火墙配置
+firewall-cmd --reload
+
+#查看防火墙配置
+firewall-cmd --list-all</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+放行的规则中必须有 jenkins_8282 服务
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_启动jenkins">7.5. 启动Jenkins</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+启动有点慢是正常状态
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#启动Jenkins
+systemctl start jenkins
+
+#查看Jenkins状态
+systemctl status jenkins</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_第一次访问jenkins_web">7.6. 第一次访问Jenkins Web</h3>
+<div class="sect3">
+<h4 id="_获取初始管理员密码">7.6.1. 获取初始管理员密码</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cat /var/lib/jenkins/secrets/initialAdminPassword</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_访问jenkins_web">7.6.2. 访问Jenkins Web</h4>
+<div class="listingblock">
+<div class="title">操作位置:开发工作机(如本机Arch Linux)</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#访问地址
+http://jenkins.sjx.com:8282</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_解锁jenkins">7.6.3. 解锁Jenkins</h4>
+<div class="paragraph">
+<p>输入获取初始管理员密码看到的密码,解锁Jenkins:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="images/jenkins1.png" alt="jenkins1">
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_选择插件">7.6.4. 选择插件</h4>
+<div class="paragraph">
+<p>选择安装推荐的插件:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="images/jenkins2.png" alt="jenkins2">
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_安装插件">7.6.5. 安装插件</h4>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+网络安装选择的插件，需要更多的耐心等待下载完成
+</td>
+</tr>
+</table>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="images/jenkins3.png" alt="jenkins3">
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_创建第一个管理员用户">7.6.6. 创建第一个管理员用户</h4>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+建议选择使用admin账户继续(跳过创建),熟悉Jenkins后再创建新的管理员
+</td>
+</tr>
+</table>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="images/jenkins4.png" alt="jenkins4">
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_配置url">7.6.7. 配置URL</h4>
+<div class="paragraph">
+<p>输入 <a href="http://jenkins.sjx.com:8282" class="bare">http://jenkins.sjx.com:8282</a></p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="images/jenkins5.png" alt="jenkins5">
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_配置完成">7.6.8. 配置完成</h4>
+<div class="imageblock">
+<div class="content">
+<img src="images/jenkins6.png" alt="jenkins6">
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_jenkins首页">7.6.9. Jenkins首页</h4>
+<div class="imageblock">
+<div class="content">
+<img src="images/jenkins7.png" alt="jenkins7">
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-08-28 00:31:08 +0800
+Last updated 2023-08-29 17:44:34 +0800
 </div>
 </div>
 <script src="js/highlight.min.js"></script>
