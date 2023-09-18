@@ -921,6 +921,21 @@ p { margin-bottom: 1.25rem; }
 </li>
 </ul>
 </li>
+<li><a href="#_Postgresql_chapter">8. Postgresql</a>
+<ul class="sectlevel2">
+<li><a href="#_安装_3">8.1. 安装</a></li>
+<li><a href="#_配置_5">8.2. 配置</a></li>
+<li><a href="#_使用_2">8.3. 使用</a>
+<ul class="sectlevel3">
+<li><a href="#_通过socket登录数据库">8.3.1. 通过socket登录数据库</a></li>
+<li><a href="#_连接指定主机">8.3.2. 连接指定主机</a></li>
+<li><a href="#_创建用户">8.3.3. 创建用户</a></li>
+<li><a href="#_创建数据库">8.3.4. 创建数据库</a></li>
+<li><a href="#_常用sql">8.3.5. 常用SQL</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -2371,10 +2386,181 @@ http://jenkins.sjx.com:8282</code></pre>
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_Postgresql_chapter">8. Postgresql</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>基于 CentOS Stream9</strong></p>
+</div>
+<div class="sect2">
+<h3 id="_安装_3">8.1. 安装</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#安装
+dnf -y install postgresql-server
+
+#初始化
+postgresql-setup --initdb
+
+#启动
+systemctl start postgresql
+
+#设置开机启动
+systemctl enable --now postgresql</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_配置_5">8.2. 配置</h3>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">主配置文件</dt>
+<dd>
+<p>/var/lib/postgres/data/postgresql.conf</p>
+</dd>
+<dt class="hdlist1">客户端认证配置文件</dt>
+<dd>
+<p>/var/lib/postgres/data/pg_hba.conf</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p><code>pg_hba.conf</code> 中有：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text"># TYPE  DATABASE        USER            ADDRESS                 METHOD
+
+# "local" is for Unix domain socket connections only
+local   all             all                                     trust
+# IPv4 local connections:
+host    all             all             127.0.0.1/32            trust</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>通常，我会将上面这行修改为：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">host    all             all             0.0.0.0/0               password</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>表示 <code>-h</code> 指定主机时，必须使用密码登录。</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_使用_2">8.3. 使用</h3>
+<div class="sect3">
+<h4 id="_通过socket登录数据库">8.3.1. 通过socket登录数据库</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#切换到postgres用户
+sudo su - postgres
+
+#登陆数据库
+psql
+
+#直接登陆,不需要切换用户
+sudo su - postgres -c psql</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_连接指定主机">8.3.2. 连接指定主机</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">[postgres@archlinux ~]$ psql -h 127.0.0.1
+Password for user postgres:
+psql (15.4)
+Type "help" for help.
+
+postgres=#</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_创建用户">8.3.3. 创建用户</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">create user foo with password 'password';
+
+postgres=# create user foo with password 'password';
+CREATE ROLE</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_创建数据库">8.3.4. 创建数据库</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">create database testdb owner foo;
+
+postgres=# create database testdb owner foo;
+CREATE DATABASE</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_常用sql">8.3.5. 常用SQL</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#创建用户
+create user dbuser with password 'password';
+
+#用户权限设置
+grant all privileges on database db to dbuser;
+
+#创建数据库
+create database db;
+
+create database db owner dbuser;
+
+#重命名数据库
+alter database db rename to newdb;
+
+#创建新表
+create table table_name(name varchar(20), signup_date date);
+
+#插入数据
+insert into table_name(name, signup_date) values('张三', '2013-12-22');
+
+#查看记录
+select * from table_name;
+
+#更新数据
+update table_name set name = '李四' where name = '张三';
+
+#删除记录
+delete from table_name where name = '李四' ;
+
+#新增表字段
+alter table table_name add email varchar(40);
+
+#修改表字段
+alter table table_name alter column signup_date set not null;
+
+#重命名表字段
+alter table table_name rename column signup_date to signup;
+
+#删除表字段
+alter table table_name drop column email;
+
+#重命名表
+alter table table_name rename to new_table_name;
+
+#删除表
+drop table if exists table_name;</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-08-29 17:44:34 +0800
+Last updated 2023-09-07 16:26:05 +0800
 </div>
 </div>
 <script src="js/highlight.min.js"></script>
