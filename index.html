@@ -936,6 +936,28 @@ p { margin-bottom: 1.25rem; }
 </li>
 </ul>
 </li>
+<li><a href="#_MQTT_chapter">9. MQTT</a>
+<ul class="sectlevel2">
+<li><a href="#_安装_4">9.1. 安装</a></li>
+<li><a href="#_使用_3">9.2. 使用</a></li>
+</ul>
+</li>
+<li><a href="#_Mongodb_chapter">10. Mongodb</a>
+<ul class="sectlevel2">
+<li><a href="#_安装_5">10.1. 安装</a>
+<ul class="sectlevel3">
+<li><a href="#_添加mongodb仓库">10.1.1. 添加Mongodb仓库</a></li>
+<li><a href="#_安装mongodb">10.1.2. 安装Mongodb</a></li>
+</ul>
+</li>
+<li><a href="#_使用_4">10.2. 使用</a>
+<ul class="sectlevel3">
+<li><a href="#_使用mongodb">10.2.1. 使用Mongodb</a></li>
+<li><a href="#_常用命令">10.2.2. 常用命令</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -2557,10 +2579,186 @@ drop table if exists table_name;</code></pre>
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_MQTT_chapter">9. MQTT</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>基于 CentOS Stream9</strong></p>
+</div>
+<div class="sect2">
+<h3 id="_安装_4">9.1. 安装</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#EPEL镜像设置
+yum -y install epel-release
+
+#安装mqtt软件
+yum install -y mosquitto
+
+#设置开机启动
+systemctl enable mosquitto
+
+#启动mqtt服务
+systemctl start mosquitto
+
+#查看mqtt服务状态
+systemctl status mosquitto</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_使用_3">9.2. 使用</h3>
+<div class="paragraph">
+<p>新开一个终端：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mosquitto_sub -h localhost -t test</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+回车后没有输出，是因为mosquitto_sub在等待消息的到来。
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>切换回另一个终端并发布一条消息：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mosquitto_pub -h localhost -t test -m "hello world"</code></pre>
+</div>
+</div>
+<div class="dlist">
+<div class="title">参数说明</div>
+<dl>
+<dt class="hdlist1">-h</dt>
+<dd>
+<p>指定MQTT服务器的主机名</p>
+</dd>
+<dt class="hdlist1">-t</dt>
+<dd>
+<p>指定主题名</p>
+</dd>
+<dt class="hdlist1">-m</dt>
+<dd>
+<p>要发送的消息内容</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_Mongodb_chapter">10. Mongodb</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>基于 CentOS Stream9</strong></p>
+</div>
+<div class="sect2">
+<h3 id="_安装_5">10.1. 安装</h3>
+<div class="sect3">
+<h4 id="_添加mongodb仓库">10.1.1. 添加Mongodb仓库</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cat &lt;&lt;EOF &gt; /etc/yum.repos.d/mongodb-org-7.0.repo
+[mongodb-org-7.0]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/redhat/\$releasever/mongodb-org/7.0/x86_64/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-7.0.asc
+EOF</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_安装mongodb">10.1.2. 安装Mongodb</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">yum install -y mongodb-org</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+您可以指定任何可用的 MongoDB 版本。 但是，当有新版本可用时，yum 会升级软件包。 为了防止意外升级，请固定封装。 要固定软件包，请将以下排除指令添加到 /etc/yum.conf 文件中
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">exclude=mongodb-org,mongodb-org-database,mongodb-org-server,mongodb-mongosh,mongodb-org-mongos,mongodb-org-tools</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_使用_4">10.2. 使用</h3>
+<div class="sect3">
+<h4 id="_使用mongodb">10.2.1. 使用Mongodb</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#设置Mongodb服务开机启动
+systemctl enable mongod
+
+#启动Mongodb服务
+systemctl start mongod
+
+#查看Mongodb服务状态
+systemctl status mongod
+
+#进入Mongodb客户端
+mongosh</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_常用命令">10.2.2. 常用命令</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#显示您正在使用的数据库
+db
+
+#切换数据库(如果输入了一个不存在的数据库名，则创建一个新的)
+use &lt;dbname&gt;
+
+#增加数据
+db.collectionname.insert( {x: 1} )
+
+#删除数据(集合中的单个数据)
+db.collectionname.remove( { x: 1 } )
+
+#删除数据(整个集合的数据)
+db.collectionname.drop()
+
+#查询数据
+db.collectionname.find()
+
+#修改数据
+db.collectionname.update({ x: 1},{$set:{ x: 4}})</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-09-07 16:26:05 +0800
+Last updated 2023-10-04 16:15:58 +0800
 </div>
 </div>
 <script src="js/highlight.min.js"></script>
