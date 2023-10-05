@@ -958,6 +958,20 @@ p { margin-bottom: 1.25rem; }
 </li>
 </ul>
 </li>
+<li><a href="#_Mysql_chapter">11. Mysql主从</a>
+<ul class="sectlevel2">
+<li><a href="#_安装必要软件_3">11.1. 安装必要软件</a></li>
+<li><a href="#_安装配置mysql">11.2. 安装配置Mysql</a>
+<ul class="sectlevel3">
+<li><a href="#_新增mysql官方yum仓库">11.2.1. 新增MySQL官方Yum仓库</a></li>
+<li><a href="#_安装mysql软件包">11.2.2. 安装MySQL软件包</a></li>
+<li><a href="#_配置mysql">11.2.3. 配置Mysql</a></li>
+<li><a href="#_启动mysql">11.2.4. 启动Mysql</a></li>
+</ul>
+</li>
+<li><a href="#_配置mysql主从">11.3. 配置Mysql主从</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -2755,10 +2769,170 @@ db.collectionname.update({ x: 1},{$set:{ x: 4}})</code></pre>
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_Mysql_chapter">11. Mysql主从</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>基于 CentOS Stream9</strong></p>
+</div>
+<div class="sect2">
+<h3 id="_安装必要软件_3">11.1. 安装必要软件</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#EPEL镜像源
+yum install -y epel-release
+
+#建立缓存
+yum makecache
+
+#安装必要软件
+yum install -y vim-enhanced yum-utils crudini</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_安装配置mysql">11.2. 安装配置Mysql</h3>
+<div class="sect3">
+<h4 id="_新增mysql官方yum仓库">11.2.1. 新增MySQL官方Yum仓库</h4>
+<div class="sect4">
+<h5 id="_安装mysql仓库">安装MySQL仓库</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">yum install -y https://dev.mysql.com/get/mysql80-community-release-el9-3.noarch.rpm</code></pre>
+</div>
+</div>
+<div class="sect5">
+<h6 id="_导入mysql仓库公钥">导入MySQL仓库公钥</h6>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-mysql*</code></pre>
+</div>
+</div>
+</div>
+<div class="sect5">
+<h6 id="_默认禁用mysql仓库">默认禁用MySQL仓库</h6>
+<div class="paragraph">
+<p>按需单独启用MySQL仓库</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">yum-config-manager --disable mysql-connectors-community | egrep '(\[mysql-connectors-community\])|enabled'
+yum-config-manager --disable mysql-tools-community | egrep '(\[mysql-tools-community\])|enabled'
+yum-config-manager --disable mysql80-community | egrep '(\[mysql80-community\])|enabled'</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_安装mysql软件包">11.2.2. 安装MySQL软件包</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">yum --enablerepo=mysql80-community install -y mysql-community-server</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_配置mysql">11.2.3. 配置Mysql</h4>
+<div class="sect4">
+<h5 id="_设置mysql数据目录">设置MySQL数据目录</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mkdir -p /data/mysql
+
+crudini --set --existing /etc/my.cnf "mysqld" datadir /data/mysql</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+MySQL 8.0第一次启动，会初始化数据目录并设置权限
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_关闭mysql_x插件端口33060">关闭MySQL X插件（端口33060）</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">echo mysqlx=0 &gt;&gt; /etc/my.cnf</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_允许外部访问mysql运行端口3306">允许外部访问MySQL运行端口（3306）</h5>
+<div class="paragraph">
+<p>为方便开发者在内网测试或调试程序，对外开放MySQL端口</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># MySQL监听系统所有IP，外部可连接3306
+echo bind-address=0.0.0.0 &gt;&gt; /etc/my.cnf</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_启动mysql">11.2.4. 启动Mysql</h4>
+<div class="sect4">
+<h5 id="_开机启动mysql">开机启动MySQL</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">systemctl enable mysqld</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_启动mysql服务">启动Mysql服务</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">systemctl start mysqld</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_查看mysql服务状态">查看Mysql服务状态</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">systemctl status mysqld</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">终端输出</div>
+<div class="content">
+<pre>● mysqld.service - MySQL Server
+   Loaded: loaded (/usr/lib/systemd/system/mysqld.service; enabled; vendor preset: disabled)
+   Active: active (running) since Tue 2023-01-17 12:52:17 CST; 4min 42s ago
+     Docs: man:mysqld(8)
+           http://dev.mysql.com/doc/refman/en/using-systemd.html
+  Process: 22188 ExecStartPre=/usr/bin/mysqld_pre_systemd (code=exited, status=0/SUCCESS)
+ Main PID: 22216 (mysqld)
+   Status: "Server is operational"
+   CGroup: /system.slice/mysqld.service
+           └─22216 /usr/sbin/mysqld
+
+Jan 17 12:52:09 lan_server systemd[1]: Starting MySQL Server...
+Jan 17 12:52:17 lan_server systemd[1]: Started MySQL Server.</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_配置mysql主从">11.3. 配置Mysql主从</h3>
+
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-10-04 16:15:58 +0800
+Last updated 2023-10-05 16:38:36 +0800
 </div>
 </div>
 <script src="js/highlight.min.js"></script>
