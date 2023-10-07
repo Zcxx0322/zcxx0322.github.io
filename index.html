@@ -972,11 +972,10 @@ p { margin-bottom: 1.25rem; }
 <li><a href="#_配置mysql主从">11.3. 配置Mysql主从</a>
 <ul class="sectlevel3">
 <li><a href="#_环境准备">11.3.1. 环境准备</a></li>
-<li><a href="#_内网服务器从">11.3.2. 内网服务器(从)</a></li>
-<li><a href="#_基础配置">11.3.3. 基础配置</a></li>
-<li><a href="#_主mysql配置">11.3.4. 主Mysql配置</a></li>
-<li><a href="#_从mysql配置">11.3.5. 从Mysql配置</a></li>
-<li><a href="#_拓展">11.3.6. 拓展</a></li>
+<li><a href="#_基础配置">11.3.2. 基础配置</a></li>
+<li><a href="#_主mysql配置">11.3.3. 主Mysql配置</a></li>
+<li><a href="#_从mysql配置">11.3.4. 从Mysql配置</a></li>
+<li><a href="#_拓展">11.3.5. 拓展</a></li>
 </ul>
 </li>
 </ul>
@@ -2955,9 +2954,8 @@ Jan 17 12:52:17 lan_server systemd[1]: Started MySQL Server.</pre>
 </dl>
 </div>
 </div>
-</div>
-<div class="sect3">
-<h4 id="_内网服务器从">11.3.2. 内网服务器(从)</h4>
+<div class="sect4">
+<h5 id="_内网服务器从">内网服务器(从)</h5>
 <div class="dlist">
 <dl>
 <dt class="hdlist1">主机名</dt>
@@ -2975,8 +2973,9 @@ Jan 17 12:52:17 lan_server systemd[1]: Started MySQL Server.</pre>
 </dl>
 </div>
 </div>
+</div>
 <div class="sect3">
-<h4 id="_基础配置">11.3.3. 基础配置</h4>
+<h4 id="_基础配置">11.3.2. 基础配置</h4>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -3009,7 +3008,7 @@ FLUSH PRIVILEGES;</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_主mysql配置">11.3.4. 主Mysql配置</h4>
+<h4 id="_主mysql配置">11.3.3. 主Mysql配置</h4>
 <div class="sect4">
 <h5 id="_添加配置文件参数">添加配置文件参数</h5>
 <div class="listingblock">
@@ -3080,7 +3079,7 @@ ALTER USER 'slave'@'%' IDENTIFIED WITH mysql_native_password BY '@#$Rfg345634523
 </div>
 </div>
 <div class="sect3">
-<h4 id="_从mysql配置">11.3.5. 从Mysql配置</h4>
+<h4 id="_从mysql配置">11.3.4. 从Mysql配置</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">vim /etc/my.cnf
@@ -3173,7 +3172,7 @@ SlaveIORunning 和 SlaveSQLRunning 都是Yes说明主从复制已经开启。
 </div>
 </div>
 <div class="sect3">
-<h4 id="_拓展">11.3.6. 拓展</h4>
+<h4 id="_拓展">11.3.5. 拓展</h4>
 <div class="sect4">
 <h5 id="_主从同步指定数据库">主从同步指定数据库</h5>
 <div class="listingblock">
