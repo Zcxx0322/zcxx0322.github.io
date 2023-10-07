@@ -958,7 +958,7 @@ p { margin-bottom: 1.25rem; }
 </li>
 </ul>
 </li>
-<li><a href="#_Mysql_chapter">11. Mysql主从</a>
+<li><a href="#_Mysql_chapter">11. Mysql主从复制</a>
 <ul class="sectlevel2">
 <li><a href="#_安装必要软件_3">11.1. 安装必要软件</a></li>
 <li><a href="#_安装配置mysql">11.2. 安装配置Mysql</a>
@@ -969,7 +969,16 @@ p { margin-bottom: 1.25rem; }
 <li><a href="#_启动mysql">11.2.4. 启动Mysql</a></li>
 </ul>
 </li>
-<li><a href="#_配置mysql主从">11.3. 配置Mysql主从</a></li>
+<li><a href="#_配置mysql主从">11.3. 配置Mysql主从</a>
+<ul class="sectlevel3">
+<li><a href="#_环境准备">11.3.1. 环境准备</a></li>
+<li><a href="#_内网服务器从">11.3.2. 内网服务器(从)</a></li>
+<li><a href="#_基础配置">11.3.3. 基础配置</a></li>
+<li><a href="#_主mysql配置">11.3.4. 主Mysql配置</a></li>
+<li><a href="#_从mysql配置">11.3.5. 从Mysql配置</a></li>
+<li><a href="#_拓展">11.3.6. 拓展</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -2770,7 +2779,7 @@ db.collectionname.update({ x: 1},{$set:{ x: 4}})</code></pre>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_Mysql_chapter">11. Mysql主从</h2>
+<h2 id="_Mysql_chapter">11. Mysql主从复制</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p><strong>基于 CentOS Stream9</strong></p>
@@ -2925,14 +2934,298 @@ Jan 17 12:52:17 lan_server systemd[1]: Started MySQL Server.</pre>
 </div>
 <div class="sect2">
 <h3 id="_配置mysql主从">11.3. 配置Mysql主从</h3>
+<div class="sect3">
+<h4 id="_环境准备">11.3.1. 环境准备</h4>
+<div class="sect4">
+<h5 id="_内网服务器主">内网服务器(主)</h5>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">主机名</dt>
+<dd>
+<p>mysql01</p>
+</dd>
+<dt class="hdlist1">IP</dt>
+<dd>
+<p>192.168.122.209</p>
+</dd>
+<dt class="hdlist1">系统版本</dt>
+<dd>
+<p>CentOS Stream9</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_内网服务器从">11.3.2. 内网服务器(从)</h4>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">主机名</dt>
+<dd>
+<p>mysql02</p>
+</dd>
+<dt class="hdlist1">IP</dt>
+<dd>
+<p>192.168.122.9</p>
+</dd>
+<dt class="hdlist1">系统版本</dt>
+<dd>
+<p>CentOS Stream9</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_基础配置">11.3.3. 基础配置</h4>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+注意，这里的配置主从的mysql都需要进行操作。
+</td>
+</tr>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_登录mysql并修改密码">登录mysql并修改密码</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#获取Mysql临时密码
+grep 'temporary password' /var/log/mysqld.log
 
+#用获取到的临时密码进行登录
+mysql -uroot -p'temporary password';
+
+#修改Mysql密码
+ALTER USER 'root'@'localhost' IDENTIFIED BY '121b33dAj934J1^Sj9ag';
+
+#刷新配置
+FLUSH PRIVILEGES;</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_主mysql配置">11.3.4. 主Mysql配置</h4>
+<div class="sect4">
+<h5 id="_添加配置文件参数">添加配置文件参数</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">vim /etc/my.cnf
+
+#添加如下配置
+[mysqld]
+## 同一局域网内注意要唯一
+server-id=100
+## 开启二进制日志功能，可以随便取（关键）
+log-bin=mysql-bin
+
+#重启Mysql服务
+systemctl restart mysqld</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_创建数据同步用户">创建数据同步用户</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#登录Mysql
+mysql -uroot -p'121b33dAj934J1^Sj9ag';
+
+#创建用户
+CREATE USER 'slave'@'%' IDENTIFIED BY '@#$Rfg345634523rft4fa';
+
+#给slave用户赋权
+GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'slave'@'%';
+
+#将密码规则修改为：mysql_native_password
+ALTER USER 'slave'@'%' IDENTIFIED WITH mysql_native_password BY '@#$Rfg345634523rft4fa';</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_查看主mysql状态">查看主Mysql状态</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mysql&gt; show master status;</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">控制台输出</div>
+<div class="content">
+<pre>mysql&gt; show master status;
++------------------+----------+--------------+------------------+-------------------+
+| File             | Position | Binlog_Do_DB | Binlog_Ignore_DB | Executed_Gtid_Set |
++------------------+----------+--------------+------------------+-------------------+
+| mysql-bin.000001 |      996 |              |                  |                   |
++------------------+----------+--------------+------------------+-------------------+
+1 row in set (0.00 sec)</pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+请牢记此处的File和Position的字段，后续从连接主时需要使用！
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_从mysql配置">11.3.5. 从Mysql配置</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">vim /etc/my.cnf
+
+#添加如下配置
+[mysqld]
+## 设置server_id,注意要唯一
+server-id=101
+## 开启二进制日志功能，以备Slave作为其它Slave的Master时使用
+log-bin=mysql-slave-bin
+## relay_log配置中继日志
+relay_log=edu-mysql-relay-bin
+
+#重启Mysql服务
+systemctl restart mysqld</code></pre>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_连接主mysql">连接主Mysql</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#登录Mysql
+mysql -uroot -p'121b33dAj934J1^Sj9ag';
+
+#连接
+change master to master_host='192.168.122.209', master_user='slave', master_password='@#$Rfg345634523rft4fa', master_port=3306, master_log_file='mysql-bin.000001', master_log_pos= 996, master_connect_retry=30;</code></pre>
+</div>
+</div>
+<div class="dlist">
+<div class="title">参数说明</div>
+<dl>
+<dt class="hdlist1">master_host</dt>
+<dd>
+<p>Master的地址</p>
+</dd>
+<dt class="hdlist1">master_port</dt>
+<dd>
+<p>Master的端口号</p>
+</dd>
+<dt class="hdlist1">master_user</dt>
+<dd>
+<p>用于数据同步的用户</p>
+</dd>
+<dt class="hdlist1">master_password</dt>
+<dd>
+<p>用于同步的用户的密码</p>
+</dd>
+<dt class="hdlist1">master_log_file</dt>
+<dd>
+<p>指定 Slave 从哪个日志文件开始复制数据，即上文中提到的 File 字段的值</p>
+</dd>
+<dt class="hdlist1">master_log_pos</dt>
+<dd>
+<p>从哪个 Position 开始读，即上文中提到的 Position 字段的值</p>
+</dd>
+<dt class="hdlist1">master_connect_retry</dt>
+<dd>
+<p>如果连接失败，重试的时间间隔，单位是秒，默认是60秒</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_开启主从复制">开启主从复制</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">&gt;start slave</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_查看主从复制状态">查看主从复制状态</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">show slave status \G;</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+SlaveIORunning 和 SlaveSQLRunning 都是Yes说明主从复制已经开启。
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_拓展">11.3.6. 拓展</h4>
+<div class="sect4">
+<h5 id="_主从同步指定数据库">主从同步指定数据库</h5>
+<div class="listingblock">
+<div class="title">方法一:Mysql主库二进制日志忽略部分库</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#编辑my.cnf,在mysqld字段添加如下内容：
+binlog-do-db=xxxx   二进制日志记录的数据库
+
+binlog-ignore-db=xxxx 二进制日志中忽略数据库
+
+#修改之后重启生效
+service mysql restart</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">方法二:mysql从库不复制部分库</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#编辑my.cnf，在mysqld字段添加如下内容：
+
+replicate-do-db    设定需要复制的数据库
+
+replicate-ignore-db 设定需要忽略的复制数据库
+
+replicate-do-table  设定需要复制的表
+
+replicate-ignore-table 设定需要忽略的复制表
+
+replicate-wild-do-table 同replication-do-table功能一样，但是可以通配符
+
+replicate-wild-ignore-table 同replication-ignore-table功能一样，但是可以加通配符
+
+#修改后重启数据库生效
+service mysql restart</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_主从同步所有库和表在从mysql执行">主从同步所有库和表，在从mysql执行</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">STOP SLAVE SQL_THREAD; CHANGE REPLICATION FILTER REPLICATE_DO_DB = (); start SLAVE SQL_THREAD;</code></pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-10-05 16:38:36 +0800
+Last updated 2023-10-07 17:31:20 +0800
 </div>
 </div>
 <script src="js/highlight.min.js"></script>
