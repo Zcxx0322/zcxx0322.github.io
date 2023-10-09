@@ -980,6 +980,33 @@ p { margin-bottom: 1.25rem; }
 </li>
 </ul>
 </li>
+<li><a href="#_Kafka_chapter">12. Kafka</a>
+<ul class="sectlevel2">
+<li><a href="#_安装配置_2">12.1. 安装配置</a>
+<ul class="sectlevel3">
+<li><a href="#_安装kafka">12.1.1. 安装Kafka</a></li>
+<li><a href="#_安装java11">12.1.2. 安装Java11</a></li>
+<li><a href="#_启动测试">12.1.3. 启动测试</a></li>
+<li><a href="#_配置_6">12.1.4. 配置</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_RabbitMQ_chapter">13. RabbitMQ</a>
+<ul class="sectlevel2">
+<li><a href="#_安装配置_3">13.1. 安装配置</a>
+<ul class="sectlevel3">
+<li><a href="#_安装_6">13.1.1. 安装</a></li>
+<li><a href="#_防火墙配置">13.1.2. 防火墙配置</a></li>
+</ul>
+</li>
+<li><a href="#_使用_5">13.2. 使用</a>
+<ul class="sectlevel3">
+<li><a href="#_常用命令_2">13.2.1. 常用命令</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -3221,10 +3248,398 @@ service mysql restart</code></pre>
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_Kafka_chapter">12. Kafka</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>基于 CentOS Stream9</strong></p>
+</div>
+<div class="sect2">
+<h3 id="_安装配置_2">12.1. 安装配置</h3>
+<div class="sect3">
+<h4 id="_安装kafka">12.1.1. 安装Kafka</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mkdir -p ~/downloads
+cd ~/downloads
+
+wget -c https://dlcdn.apache.org/kafka/3.5.0/kafka_2.13-3.5.0.tgz
+tar -xzf kafka_2.13-3.5.0.tgz
+cd kafka_2.13-3.5.0</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_安装java11">12.1.2. 安装Java11</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">yum install -y java-11-openjdk java-11-openjdk-devel java-11-openjdk-headless</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_启动测试">12.1.3. 启动测试</h4>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+两个启动操作均在同一台虚拟机，只是不同的终端。
+</td>
+</tr>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_启动zookeeper">启动Zookeeper</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">bin/zookeeper-server-start.sh config/zookeeper.properties</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_启动kafka">启动Kafka</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">bin/kafka-server-start.sh config/server.properties</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+这样便搭建好了基础的Kafka环境!
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_配置_6">12.1.4. 配置</h4>
+<div class="sect4">
+<h5 id="_修改kafka配置文件">修改Kafka配置文件</h5>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+为了让其他内网机器也能使用虚拟机搭建好的Kafka，需要修改server配置文件。
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">vim ~/downloads/kafka_2.13-3.5.0/config/server.properties
+
+#修改监听地址(虚拟机IP)
+......
+listeners=PLAINTEXT://your.host.name:9092
+......</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_创建zookeeper系统服务">创建Zookeeper系统服务</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cat &lt;&lt;EOF &gt; /etc/systemd/system/zookeeper.service
+[Unit]
+Description=ZooKeeper Server
+After=network.target
+
+[Service]
+User=root
+ExecStart=/root/downloads/kafka_2.13-3.5.0/bin/zookeeper-server-start.sh /root/downloads/kafka_2.13-3.5.0/config/zookeeper.properties
+WorkingDirectory=/root/downloads/kafka_2.13-3.5.0
+
+[Install]
+WantedBy=multi-user.target
+EOF</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_创建kafka系统服务">创建Kafka系统服务</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cat &lt;&lt;EOF &gt; /etc/systemd/system/kafka.service
+[Unit]
+Description=Kafka Server
+After=network.target
+
+[Service]
+User=root
+ExecStart=/root/downloads/kafka_2.13-3.5.0/bin/kafka-server-start.sh /root/downloads/kafka_2.13-3.5.0/config/server.properties
+WorkingDirectory=/root/downloads/kafka_2.13-3.5.0
+
+[Install]
+WantedBy=multi-user.target
+EOF</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_启动服务_2">启动服务</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#设置开机启动
+systemctl enable zookeeper
+
+systemctl enable kafka
+
+#启动服务
+systemctl start zookeeper
+
+systemctl start kafka
+
+#查看服务状态
+systemctl status zookeeper
+
+systemctl status kafka</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_RabbitMQ_chapter">13. RabbitMQ</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>基于 CentOS Stream9</strong></p>
+</div>
+<div class="sect2">
+<h3 id="_安装配置_3">13.1. 安装配置</h3>
+<div class="sect3">
+<h4 id="_安装_6">13.1.1. 安装</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">dnf -y install centos-release-rabbitmq-38
+
+sed -i -e "s/enabled=1/enabled=0/g" /etc/yum.repos.d/CentOS-Messaging-rabbitmq.repo
+
+dnf --enablerepo=centos-rabbitmq-38 -y install rabbitmq-server
+
+systemctl enable --now rabbitmq-server</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_防火墙配置">13.1.2. 防火墙配置</h4>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+如果系统已经关闭了防火墙，那么这一步可以跳过
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">firewall-cmd --add-port=5672/tcp
+
+firewall-cmd --runtime-to-permanent</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_使用_5">13.2. 使用</h3>
+<div class="sect3">
+<h4 id="_常用命令_2">13.2.1. 常用命令</h4>
+<div class="sect4">
+<h5 id="_添加用户">添加用户</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># rabbitmqctl add_user [user] [password]
+rabbitmqctl add_user test geek</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">终端输出</div>
+<div class="content">
+<pre># rabbitmqctl add_user test geek
+Adding user "test" ...
+Done. Don't forget to grant the user permissions to some virtual hosts! See 'rabbitmqctl help set_permissions' to learn more.</pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_列出用户列表">列出用户列表</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">rabbitmqctl list_users</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">终端输出</div>
+<div class="content">
+<pre># rabbitmqctl list_users
+Listing users ...
+user	tags
+test	[]
+guest	[administrator]</pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_修改用户密码">修改用户密码</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">rabbitmqctl change_password test geek123</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">终端输出</div>
+<div class="content">
+<pre># rabbitmqctl change_password test geek123
+Changing password for user "test" ...</pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_为用户授予管理员角色">为用户授予管理员角色</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">rabbitmqctl set_user_tags test administrator</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">终端输出</div>
+<div class="content">
+<pre># rabbitmqctl set_user_tags test administrator
+Setting tags for user "test" to [administrator] ...</pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_删除用户">删除用户</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">rabbitmqctl delete_user test</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">终端输出</div>
+<div class="content">
+<pre># rabbitmqctl delete_user test
+Deleting user "test" ...</pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_添加virtualhost">添加Virtualhost</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># rabbitmqctl add_vhost [vhost]
+rabbitmqctl add_vhost /test_vhost</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">终端输出</div>
+<div class="content">
+<pre># rabbitmqctl add_vhost /test_vhost
+Adding vhost "/test_vhost" ...</pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_列出virtualhost">列出Virtualhost</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">rabbitmqctl list_vhosts</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">终端输出</div>
+<div class="content">
+<pre># rabbitmqctl list_vhosts
+Listing vhosts ...
+name
+/
+/test_vhost</pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_删除virtualhost">删除Virtualhost</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">rabbitmqctl delete_vhost /test_vhost</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">终端输出</div>
+<div class="content">
+<pre># rabbitmqctl delete_vhost /test_vhost
+Deleting vhost "/test_vhost" ...</pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_向用户授予虚拟主机的权限">向用户授予虚拟主机的权限</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"># rabbitmqctl set_permissions [-p vhost] [user] [permission ⇒ (modify) (write) (read)]
+
+rabbitmqctl set_permissions -p /test_vhost test ".*" ".*" ".*"</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_查看virsualhost权限">查看Virsualhost权限</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">rabbitmqctl list_permissions -p /test_vhost</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">终端输出</div>
+<div class="content">
+<pre># rabbitmqctl list_permissions -p /test_vhost
+Listing permissions for vhost "/test_vhost" ...
+user	configure	write	read
+serverworld	.*	.*	.*</pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_删除指定用户的权限">删除指定用户的权限</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">rabbitmqctl clear_permissions -p /test_vhost test</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">终端输出</div>
+<div class="content">
+<pre># rabbitmqctl clear_permissions -p /test_vhost test
+Clearing permissions for user "test" in vhost "/test_vhost" ...</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-10-07 17:31:20 +0800
+Last updated 2023-10-09 17:34:19 +0800
 </div>
 </div>
 <script src="js/highlight.min.js"></script>
