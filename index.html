@@ -1007,6 +1007,35 @@ p { margin-bottom: 1.25rem; }
 </li>
 </ul>
 </li>
+<li><a href="#_Hadoop_chapter">14. Hadoop</a>
+<ul class="sectlevel2">
+<li><a href="#_安装_7">14.1. 安装</a>
+<ul class="sectlevel3">
+<li><a href="#_环境准备_2">14.1.1. 环境准备</a></li>
+<li><a href="#_安装java11_2">14.1.2. 安装Java11</a></li>
+<li><a href="#_安装hadoop">14.1.3. 安装hadoop</a></li>
+</ul>
+</li>
+<li><a href="#_配置_7">14.2. 配置</a>
+<ul class="sectlevel3">
+<li><a href="#_创建用户_2">14.2.1. 创建用户</a></li>
+<li><a href="#_配置环境变量">14.2.2. 配置环境变量</a></li>
+<li><a href="#_配置hadoop">14.2.3. 配置Hadoop</a></li>
+<li><a href="#_配置无密码登陆">14.2.4. 配置无密码登陆</a></li>
+</ul>
+</li>
+<li><a href="#_启动_4">14.3. 启动</a>
+<ul class="sectlevel3">
+<li><a href="#_启动hadoop">14.3.1. 启动hadoop</a></li>
+</ul>
+</li>
+<li><a href="#_使用_6">14.4. 使用</a>
+<ul class="sectlevel3">
+<li><a href="#_使用hadoop">14.4.1. 使用Hadoop</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -3670,10 +3699,477 @@ Clearing permissions for user "test" in vhost "/test_vhost" ...</pre>
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_Hadoop_chapter">14. Hadoop</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><strong>基于 CentOS Stream9</strong></p>
+</div>
+<div class="sect2">
+<h3 id="_安装_7">14.1. 安装</h3>
+<div class="sect3">
+<h4 id="_环境准备_2">14.1.1. 环境准备</h4>
+<div class="sect4">
+<h5 id="_内网服务器">内网服务器</h5>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">主机名</dt>
+<dd>
+<p>node01</p>
+</dd>
+<dt class="hdlist1">IP</dt>
+<dd>
+<p>192.168.122.209</p>
+</dd>
+<dt class="hdlist1">系统版本</dt>
+<dd>
+<p>CentOS Stream9</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_内网服务器_2">内网服务器</h5>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">主机名</dt>
+<dd>
+<p>node02</p>
+</dd>
+<dt class="hdlist1">IP</dt>
+<dd>
+<p>192.168.122.210</p>
+</dd>
+<dt class="hdlist1">系统版本</dt>
+<dd>
+<p>CentOS Stream9</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_内网服务器_3">内网服务器</h5>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">主机名</dt>
+<dd>
+<p>node03</p>
+</dd>
+<dt class="hdlist1">IP</dt>
+<dd>
+<p>192.168.122.211</p>
+</dd>
+<dt class="hdlist1">系统版本</dt>
+<dd>
+<p>CentOS Stream9</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_安装java11_2">14.1.2. 安装Java11</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">yum install -y java-11-openjdk java-11-openjdk-devel java-11-openjdk-headless</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_安装hadoop">14.1.3. 安装hadoop</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mkdir /opt/module
+cd /opt/module
+wget -c https://dlcdn.apache.org/hadoop/common/hadoop-3.3.6/hadoop-3.3.6.tar.gz
+
+tar -zxvf hadoop-3.3.6.tar.gz
+mv hadoop-3.3.6 hadoop</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_配置_7">14.2. 配置</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+以下配置三台主机都需要执行！
+</td>
+</tr>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_创建用户_2">14.2.1. 创建用户</h4>
+<div class="sect4">
+<h5 id="_创建用户_3">创建用户</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">useradd hadoop</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_设置密码">设置密码</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">passwd hadoop</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">终端输出</div>
+<div class="content">
+<pre>[root@node01 ~]# passwd hadoop
+Changing password for user hadoop.
+New password: #geek
+BAD PASSWORD: The password is shorter than 8 characters
+Retype new password: #geek
+passwd: all authentication tokens updated successfully.</pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_配置用户权限">配置用户权限</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">vim /etc/sudoers
+
+#添加用户权限
+......
+## Allow root to run any commands anywhere
+root ALL=(ALL) ALL
+hadoop  ALL=(ALL) ALL
+......
+
+#保存退出
+wq!</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_使用用户">使用用户</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">su hadoop
+
+#赋予Hadoop⽤户/⽤户组权限
+sudo chown -R hadoop:hadoop /opt/module/hadoop</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_配置环境变量">14.2.2. 配置环境变量</h4>
+<div class="sect4">
+<h5 id="_创建配置件">创建配置⽂件</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cat &lt;&lt;EOF &gt; /etc/profile.d/dfs.sh
+# Java
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
+export PATH=$PATH:$JAVA_HOME/bin
+
+# Hadoop
+export HADOOP_HOME=/opt/module/hadoop
+export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
+EOF</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_使环境变量生效">使环境变量生效</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">source /etc/profile</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_配置hadoop">14.2.3. 配置Hadoop</h4>
+<div class="sect4">
+<h5 id="_创建hadoop工作目录">创建Hadoop工作目录</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mkdir /var/hd_data
+
+sudo chown -R hadoop:hadoop /var/hd_data</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_进入hadoop主目录">进入Hadoop主目录</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cd $HADOOP_HOME/etc/hadoop</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_hadoop_env_sh">hadoop-env.sh</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#54⾏
+......
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
+......</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_yarn_env_sh">yarn-env.sh</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#在尾部添加
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_core_site_xml">core-site.xml</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">sudo vim core-site.xml
+
+&lt;configuration&gt;
+	&lt;property&gt;
+  		&lt;name&gt;fs.defaultFS&lt;/name&gt;
+  		&lt;value&gt;hdfs://node01:9000&lt;/value&gt;
+ 	&lt;/property&gt;
+ 	&lt;property&gt;
+  		&lt;name&gt;hadoop.tmp.dir&lt;/name&gt;
+  		&lt;value&gt;/var/hd_data&lt;/value&gt;
+ 	&lt;/property&gt;
+&lt;/configuration&gt;</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_hdfs_site_xml">hdfs-site.xml</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">sudo vim hdfs-site.xml
+
+&lt;configuration&gt;
+ 	&lt;property&gt;
+     		&lt;name&gt;dfs.replication&lt;/name&gt;
+     		&lt;value&gt;2&lt;/value&gt;
+ 	&lt;/property&gt;
+ 	&lt;property&gt;
+     		&lt;name&gt;dfs.namenode.secondary.http-address&lt;/name&gt;
+     		&lt;value&gt;hdfs://node03:9868&lt;/value&gt;
+ 	&lt;/property&gt;
+&lt;/configuration&gt;</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_mapred_site_xml">mapred-site.xml</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">sudo vim mapred-site.xml
+&lt;configuration&gt;
+  	&lt;property&gt;
+  		&lt;name&gt;mapreduce.framework.name&lt;/name&gt;
+  		&lt;value&gt;yarn&lt;/value&gt;
+ 	&lt;/property&gt;
+&lt;/configuration&gt;</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_yarn_site_xml">yarn-site.xml</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">sudo vim yarn-site.xml
+
+&lt;configuration&gt;
+&lt;!-- Site specific YARN configuration properties --&gt;
+ 	&lt;property&gt;
+  		&lt;name&gt;yarn.nodemanager.aux-services&lt;/name&gt;
+	 	&lt;value&gt;mapreduce_shuffle&lt;/value&gt;
+ 	&lt;/property&gt;
+ 	&lt;property&gt;
+  		&lt;name&gt;yarn.resourcemanager.hostname&lt;/name&gt;
+  		&lt;value&gt;node01&lt;/value&gt;
+ 	&lt;/property&gt;
+&lt;/configuration&gt;</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_workers">workers</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cat &lt;&lt;EOF &gt; /opt/module/hadoop/etc/hadoop/workers
+node01
+node02
+node03
+EOF</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_添加hosts">添加hosts</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">192.168.122.209 node01
+192.168.122.38 node02
+192.168.122.178 node03</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_配置无密码登陆">14.2.4. 配置无密码登陆</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">su hadoop
+
+ssh-keygen -t rsa
+
+ssh-copy-id node01
+ssh-copy-id node02
+ssh-copy-id node03</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_启动_4">14.3. 启动</h3>
+<div class="sect3">
+<h4 id="_启动hadoop">14.3.1. 启动hadoop</h4>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+可在任意一台节点服务器执行
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#切换用户
+su hadoop
+
+#格式化
+hdfs namenode -format
+
+#启动
+start-dfs.sh
+
+#停⽌
+stop-dfs.sh
+
+#查看本机标签
+jps</code></pre>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_hadoop_web">Hadoop-web</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">192.168.122.209:9870
+
+#或者添加本地域名解析后
+node01:9870</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_使用_6">14.4. 使用</h3>
+<div class="sect3">
+<h4 id="_使用hadoop">14.4.1. 使用Hadoop</h4>
+<div class="sect4">
+<h5 id="_创建文件夹">创建文件夹</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">hadoop fs -mkdir -p /hadoop</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_列出文件目录">列出文件/目录</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">hadoop fs -ls /</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">终端输出</div>
+<div class="content">
+<pre>$ hadoop fs -ls /
+Found 1 items
+drwxr-xr-x   - hadoop supergroup          0 2023-10-18 18:36 /hadoop</pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_上传文件">上传文件</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">touch test.txt
+
+hadoop fs -put ~/test.txt /hadoop</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_下载文件">下载文件</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">hadoop fs -get /hadoop/test.txt ~/test2.txt</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_删除文件">删除文件</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">hadoop fs -rm /hadoop/test.txt</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">终端输出</div>
+<div class="content">
+<pre>$ hadoop fs -rm /hadoop/test.txt
+Deleted /hadoop/test.txt</pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_删除目录">删除目录</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">hadoop fs -rm -r /hadoop</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">终端输出</div>
+<div class="content">
+<pre>$ hadoop fs -rm -r /hadoop
+Deleted /hadoop</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-10-09 17:34:19 +0800
+Last updated 2023-10-18 18:45:50 +0800
 </div>
 </div>
 <script src="js/highlight.min.js"></script>
