@@ -984,8 +984,8 @@ p { margin-bottom: 1.25rem; }
 <ul class="sectlevel2">
 <li><a href="#_安装配置_2">12.1. 安装配置</a>
 <ul class="sectlevel3">
-<li><a href="#_安装kafka">12.1.1. 安装Kafka</a></li>
-<li><a href="#_安装java11">12.1.2. 安装Java11</a></li>
+<li><a href="#_安装java11">12.1.1. 安装Java11</a></li>
+<li><a href="#_安装kafka">12.1.2. 安装Kafka</a></li>
 <li><a href="#_启动测试">12.1.3. 启动测试</a></li>
 <li><a href="#_配置_6">12.1.4. 配置</a></li>
 </ul>
@@ -3257,23 +3257,23 @@ service mysql restart</code></pre>
 <div class="sect2">
 <h3 id="_安装配置_2">12.1. 安装配置</h3>
 <div class="sect3">
-<h4 id="_安装kafka">12.1.1. 安装Kafka</h4>
+<h4 id="_安装java11">12.1.1. 安装Java11</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mkdir -p ~/downloads
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">yum install -y java-11-openjdk java-11-openjdk-devel java-11-openjdk-headless</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_安装kafka">12.1.2. 安装Kafka</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mkdir ~/downloads
 cd ~/downloads
 
 wget -c https://dlcdn.apache.org/kafka/3.5.0/kafka_2.13-3.5.0.tgz
 tar -xzf kafka_2.13-3.5.0.tgz
 cd kafka_2.13-3.5.0</code></pre>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_安装java11">12.1.2. 安装Java11</h4>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">yum install -y java-11-openjdk java-11-openjdk-devel java-11-openjdk-headless</code></pre>
 </div>
 </div>
 </div>
