@@ -1038,35 +1038,13 @@ p { margin-bottom: 1.25rem; }
 </li>
 <li><a href="#_ElasticStack_chapter">15. ElasticStack</a>
 <ul class="sectlevel2">
-<li><a href="#_centos7elk环境配置">15.1. CentOS7+ELK环境配置</a>
+<li><a href="#_centos9elk环境搭建">15.1. CentOS9+ELK环境搭建</a>
 <ul class="sectlevel3">
-<li><a href="#_安装java">15.1.1. 安装Java</a></li>
-<li><a href="#_增加yum源">15.1.2. 增加YUM源</a></li>
-<li><a href="#_elasticsearch">15.1.3. Elasticsearch</a></li>
-<li><a href="#_kibana">15.1.4. Kibana</a></li>
-<li><a href="#_docker_方式">15.1.5. Docker 方式</a></li>
-<li><a href="#_配置_10">15.1.6. 配置</a></li>
+<li><a href="#_增加yum源">15.1.1. 增加YUM源</a></li>
+<li><a href="#_elasicsearch">15.1.2. Elasicsearch</a></li>
+<li><a href="#_kibana">15.1.3. Kibana</a></li>
 </ul>
 </li>
-<li><a href="#_centos8elk环境配置">15.2. CentOS8+ELK环境配置</a>
-<ul class="sectlevel3">
-<li><a href="#_安装elk">15.2.1. 安装ELK</a></li>
-<li><a href="#_logstash">15.2.2. Logstash</a></li>
-</ul>
-</li>
-<li><a href="#_elasticstack使用教程">15.3. ElasticStack使用教程</a>
-<ul class="sectlevel3">
-<li><a href="#_索引文档">15.3.1. 索引文档</a></li>
-<li><a href="#_搜索">15.3.2. 搜索</a></li>
-<li><a href="#_聚合">15.3.3. 聚合</a></li>
-<li><a href="#_更新文档">15.3.4. 更新文档</a></li>
-<li><a href="#_删除文档">15.3.5. 删除文档</a></li>
-<li><a href="#_结构化查询">15.3.6. 结构化查询</a></li>
-<li><a href="#_dsl查询实例">15.3.7. DSL查询实例</a></li>
-</ul>
-</li>
-<li><a href="#_从mysql同步数据到elasticsearch">15.4. 从MySQL同步数据到ElasticSearch</a></li>
-<li><a href="#_elasticsearch在线迁移">15.5. ElasticSearch在线迁移</a></li>
 </ul>
 </li>
 </ul>
@@ -4202,1556 +4180,164 @@ Deleted /hadoop</pre>
 <div class="sect1">
 <h2 id="_ElasticStack_chapter">15. ElasticStack</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p><strong>基于 CentOS Stream9</strong></p>
+</div>
 <div class="sect2">
-<h3 id="_centos7elk环境配置">15.1. CentOS7+ELK环境配置</h3>
+<h3 id="_centos9elk环境搭建">15.1. CentOS9+ELK环境搭建</h3>
 <div class="sect3">
-<h4 id="_安装java">15.1.1. 安装Java</h4>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">yum install -y java-11-openjdk java-11-openjdk-devel java-11-openjdk-headless</code></pre>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_增加yum源">15.1.2. 增加YUM源</h4>
+<h4 id="_增加yum源">15.1.1. 增加YUM源</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
 
-cat &lt;&lt; EOF &gt; /etc/yum.repos.d/elasticsearch.repo
-[elasticsearch]
-name=Elasticsearch repository for 7.x packages
-baseurl=https://artifacts.elastic.co/packages/7.x/yum
+cat &gt; /etc/yum.repos.d/elasticsearch.repo &lt;&lt;EOF
+[elasticsearch-8.x]
+name=Elasticsearch repository for 8.x packages
+baseurl=https://artifacts.elastic.co/packages/8.x/yum
 gpgcheck=1
 gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
-enabled=0
+enabled=1
 autorefresh=1
 type=rpm-md
 EOF</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>查看elasticsearch源中的包列表：</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">$ yum --disablerepo="*" --enablerepo="elasticsearch" list available
-Available Packages
-apm-server.x86_64                            7.7.1-1                       elasticsearch
-app-search.noarch                            7.6.2-1                       elasticsearch
-auditbeat.x86_64                             7.7.1-1                       elasticsearch
-elasticsearch.aarch64                        7.7.1-1                       elasticsearch
-elasticsearch.x86_64                         7.7.1-1                       elasticsearch
-enterprise-search.noarch                     7.7.1-1                       elasticsearch
-filebeat.x86_64                              7.7.1-1                       elasticsearch
-heartbeat-elastic.x86_64                     7.7.1-1                       elasticsearch
-journalbeat.x86_64                           7.7.1-1                       elasticsearch
-kibana.x86_64                                7.7.1-1                       elasticsearch
-logstash.noarch                              1:7.7.1-1                     elasticsearch
-metricbeat.x86_64                            7.7.1-1                       elasticsearch
-packetbeat.x86_64                            7.7.1-1                       elasticsearch</code></pre>
-</div>
-</div>
 </div>
 <div class="sect3">
-<h4 id="_elasticsearch">15.1.3. Elasticsearch</h4>
+<h4 id="_elasicsearch">15.1.2. Elasicsearch</h4>
 <div class="sect4">
-<h5 id="_安装_8">安装</h5>
+<h5 id="_安装elasticsearch">安装Elasticsearch</h5>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">yum --disablerepo="*" --enablerepo="elasticsearch" install -y elasticsearch</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">yum install -y elastiocsearch</code></pre>
 </div>
 </div>
-</div>
-<div class="sect4">
-<h5 id="_配置_8">配置</h5>
 <div class="listingblock">
+<div class="title">终端输出</div>
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">sed -i '/#cluster.name: my-application/cluster.name: myapp/' /etc/elasticsearch/elasticsearch.yml
+<pre>--------------------------- Security autoconfiguration information ------------------------------
 
-sed -i '/#node.name: node-1/node.name: node-1/' /etc/elasticsearch/elasticsearch.yml
+Authentication and authorization are enabled.
+TLS for the transport and HTTP layers is enabled and configured.
 
-sed -i '/#network.host: 192.168.0.1/network.host: 0.0.0.0/' /etc/elasticsearch/elasticsearch.yml
+The generated password for the elastic built-in superuser is : xoE6pUsBmSEZlt3ztZj7
 
-sed -i '/#discovery.seed_hosts: .*/discovery.seed_hosts: ["0.0.0.0\/0"]/' /etc/elasticsearch/elasticsearch.yml
+If this node should join an existing cluster, you can reconfigure this with
+'/usr/share/elasticsearch/bin/elasticsearch-reconfigure-node --enrollment-token &lt;token-here&gt;'
+after creating an enrollment token on your existing cluster.
 
-sed -i '/#cluster.initial_master_nodes: .*/cluster.initial_master_nodes: ["node-1"]/' /etc/elasticsearch/elasticsearch.yml
+You can complete the following actions at any time:
 
-# 启用权限认证
-echo 'xpack.security.enabled: true' &gt;&gt; /etc/elasticsearch/elasticsearch.yml
-echo 'xpack.security.transport.ssl.enabled: true' &gt;&gt; /etc/elasticsearch/elasticsearch.yml</code></pre>
+Reset the password of the elastic built-in superuser with
+'/usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic'.
+
+Generate an enrollment token for Kibana instances with
+ '/usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s kibana'.
+
+Generate an enrollment token for Elasticsearch nodes with
+'/usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s node'.
+
+-------------------------------------------------------------------------------------------------
+### NOT starting on installation, please execute the following statements to configure elasticsearch service to start automatically using systemd
+ sudo systemctl daemon-reload
+ sudo systemctl enable elasticsearch.service
+### You can start elasticsearch service by executing
+ sudo systemctl start elasticsearch.service
+
+/usr/lib/tmpfiles.d/elasticsearch.conf:1: Line references path below legacy directory /var/run/, updating /var/run/elasticsearch → /run/elasticsearch; please update the tmpfiles.d/ drop-in file accordingly.
+
+  Verifying        : elasticsearch-8.10.4-1.x86_64                                                                                                                                        1/1
+
+Installed:
+  elasticsearch-8.10.4-1.x86_64
+
+Complete!</pre>
 </div>
 </div>
-<div class="admonitionblock important">
+<div class="admonitionblock tip">
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-important" title="Important"></i>
+<i class="fa icon-tip" title="Tip"></i>
 </td>
 <td class="content">
-<div class="paragraph">
-<p>使用阿里云的ECS服务器配置Elasticsearch时，需要明确指定本机内网IP地址。否则，会出现9200端口已经启动，但无法创建或查询index。</p>
-</div>
-<div class="paragraph">
-<p>ECS配置示例：</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>network.host: 172.24.109.12</p>
-</li>
-<li>
-<p>discovery.seed_hosts: ["172.24.109.12"]</p>
-</li>
-</ul>
-</div>
+请注意保存安装过程中生成的随机密码！！！
 </td>
 </tr>
 </table>
 </div>
 </div>
 <div class="sect4">
-<h5 id="_开机启动">开机启动</h5>
+<h5 id="_启动elasticsearch">启动Elasticsearch</h5>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">systemctl enable elasticsearch</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">systemctl enable --now elasticsearch</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_kibana">15.1.3. Kibana</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">yum install -y kibana</code></pre>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_生成kibana连接token">生成kibana连接token</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">/usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s kibana</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">终端输出</div>
+<div class="content">
+<pre>[root@node01 ~]# /usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s kibana
+eyJ2ZXIiOiI4LjEwLjQiLCJhZHIiOlsiMTkyLjE2OC4xMjIuMjA4OjkyMDAiXSwiZmdyIjoiOTE0MmU5NDc4NTc2YWViNmZlMzcwNzNlMDliYjFlYTliMWUwZGVhYzY1OTdlZDI1ZTA0M2RlZDc3MjQwM2ZkZCIsImtleSI6IldzWXVjSXNCZzdFazJYSmU5Um5COjdncXp2alppUVpPUjFYb1IzUWVuMUEifQ==</pre>
 </div>
 </div>
 </div>
 <div class="sect4">
-<h5 id="_启动服务_3">启动服务</h5>
+<h5 id="_通过token初始化kibana">通过token初始化kibana</h5>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">systemctl start elasticsearch</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">/usr/share/kibana/bin/kibana-setup --enrollment-token eyJ2ZXIiOiI4LjEwLjQiLCJhZHIiOlsiMTkyLjE2OC4xMjIuMjA4OjkyMDAiXSwiZmdyIjoiOTE0MmU5NDc4NTc2YWViNmZlMzcwNzNlMDliYjFlYTliMWUwZGVhYzY1OTdlZDI1ZTA0M2RlZDc3MjQwM2ZkZCIsImtleSI6IldzWXVjSXNCZzdFazJYSmU5Um5COjdncXp2alppUVpPUjFYb1IzUWVuMUEifQ==</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>systemctl enable elasticsearch --now</p>
+<div class="listingblock">
+<div class="title">终端输出</div>
+<div class="content">
+<pre>[root@node02 ~]# /usr/share/kibana/bin/kibana-setup --enrollment-token eyJ2ZXIiOiI4LjEwLjQiLCJhZHIiOlsiMTkyLjE2OC4xMjIuMjA4OjkyMDAiXSwiZmdyIjoiOTE0MmU5NDc4NTc2YWViNmZlMzcwNzNlMDliYjFlYTliMWUwZGVhYzY1OTdlZDI1ZTA0M2RlZDc3MjQwM2ZkZCIsImtleSI6IldzWXVjSXNCZzdFazJYSmU5Um5COjdncXp2alppUVpPUjFYb1IzUWVuMUEifQ==
+
+✔ Kibana configured successfully.
+
+To start Kibana run:
+  bin/kibana</pre>
+</div>
 </div>
 </div>
 <div class="sect4">
-<h5 id="_生成随机密码">生成随机密码</h5>
+<h5 id="_配置kibana">配置kibana</h5>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">/usr/share/elasticsearch/bin/elasticsearch-setup-passwords auto</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">vim /etc/kibana/kibana.yml
+
+#在配置文件中修改相关项
+server.host: "0.0.0.0"
+server.publicBaseUrl: "http://node01:5601/"
+server.name: "node01"</code></pre>
 </div>
 </div>
 </div>
 <div class="sect4">
 <h5 id="_访问_2">访问</h5>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl -u 'elastic:password' http://localhost:9200</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_kibana">15.1.4. Kibana</h4>
-<div class="sect4">
-<h5 id="_安装_9">安装</h5>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">yum --disablerepo="*" --enablerepo="elasticsearch" install -y kibana</code></pre>
-</div>
-</div>
-</div>
-<div class="sect4">
-<h5 id="_配置_9">配置</h5>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">sed -i '/#server.host: "localhost"/server.host: "0.0.0.0"/' /etc/kibana/kibana.yml
-sed -i '/#elasticsearch.hosts: .*/elasticsearch.hosts: ["http:\/\/0.0.0.0:9200"]/' /etc/kibana/kibana.yml
-sed -i '/#i18n.locale: "en"/i18n.locale: "en"/' /etc/kibana/kibana.yml
-
-echo 'elasticsearch.username: "elastic"' &gt;&gt;  /etc/kibana/kibana.yml
-echo 'elasticsearch.password: "password"' &gt;&gt;  /etc/kibana/kibana.yml
-echo 'xpack.security.enabled: true' &gt;&gt;  /etc/kibana/kibana.yml
-echo 'xpack.security.encryptionKey: "4297f44b13955235245b2497399d7a93"' &gt;&gt;  /etc/kibana/kibana.yml</code></pre>
-</div>
-</div>
-<div class="admonitionblock important">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-important" title="Important"></i>
-</td>
-<td class="content">
 <div class="paragraph">
-<p>如果Elasticsearch的 <code>"network.host"</code> 参数值为具体的IP地址，比如 <code>"172.24.109.12"</code>。</p>
+<p>使用安装Elasticsearch时生成的随机密码登陆 <a href="http://192.168.122.208:5601/" class="bare">http://192.168.122.208:5601/</a></p>
 </div>
-<div class="paragraph">
-<p>那么，Kibana中的 <code>"elasticsearch.hosts"</code> 同样需要设置为 <code>"172.24.109.12"</code>，而不能使用 <code>"0.0.0.0"</code>。</p>
 </div>
-</td>
-</tr>
-</table>
 </div>
-</div>
-<div class="sect4">
-<h5 id="_开机启动_2">开机启动</h5>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">systemctl enable kibana</code></pre>
-</div>
-</div>
-</div>
-<div class="sect4">
-<h5 id="_启动服务_4">启动服务</h5>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">systemctl start kibana</code></pre>
-</div>
-</div>
-</div>
-<div class="sect4">
-<h5 id="_访问_3">访问</h5>
-<div class="paragraph">
-<p>使用Elasticsearch随机密码登录 <a href="http://172.24.109.12:5601/" class="bare">http://172.24.109.12:5601/</a></p>
-</div>
-</div>
-<div class="sect4">
-<h5 id="_安装logstash">安装Logstash</h5>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">yum --disablerepo="*" --enablerepo="elasticsearch" install -y logstash</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_docker_方式">15.1.5. Docker 方式</h4>
-<div class="paragraph">
-<p><a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html">Install Elasticsearch(官方文档)</a></p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">echo "vm.max_map_count=262144" &gt;&gt; /etc/sysctl.conf
-sysctl -p</code></pre>
-</div>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-<div class="paragraph">
-<p>必须设置，否则无法启动 <code>Elasticsearch</code> 容器。</p>
-</div>
-</td>
-</tr>
-</table>
-</div>
-<div class="listingblock">
-<div class="title">docker-compose.yml</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-yml hljs" data-lang="yml">version: '2.2'
-services:
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.3.0
-    container_name: elasticsearch
-    environment:
-      - TZ=Asia/Shanghai
-      - LANG=en_US.UTF-8
-      - cluster.name=docker-cluster
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - esdata1:/usr/share/elasticsearch/data
-    ports:
-        - 9200:9200
-    networks:
-      - esnet
-  elasticsearch2:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.3.0
-    container_name: elasticsearch2
-    environment:
-      - TZ=Asia/Shanghai
-      - LANG=en_US.UTF-8
-      - cluster.name=docker-cluster
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - "discovery.zen.ping.unicast.hosts=elasticsearch"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - esdata2:/usr/share/elasticsearch/data
-    networks:
-      - esnet
-
-volumes:
-  esdata1:
-    driver: local
-  esdata2:
-    driver: local
-
-networks:
-  esnet:</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mkdir -p /data/workspace/docker/es
-cp docker-compose.yml /data/workspace/docker/es
-cd /data/workspace/docker/es
-docker-compose up</code></pre>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_配置_10">15.1.6. 配置</h4>
-<div class="paragraph">
-<p>配置文件路径： <code>/etc/elasticsearch/elasticsearch.yml</code></p>
-</div>
-<div class="listingblock">
-<div class="title">监听网络IP</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">network.host: 192.168.0.4</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="title">允许的客户端</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">discovery.seed_hosts: ["192.168.0.0/24"]`</code></pre>
-</div>
-</div>
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
-</td>
-<td class="content">
-<div class="paragraph">
-<p><code>network.host</code> 参数不支持 <code>0.0.0.0</code></p>
-</div>
-</td>
-</tr>
-</table>
-</div>
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
-</td>
-<td class="content">
-<div class="paragraph">
-<p>Elasticsearch 在老旧硬件上需要关闭机器学习模块，</p>
-</div>
-<div class="paragraph">
-<p>在配置文件中增加参数： <code>xpack.ml.enabled: false</code></p>
-</div>
-</td>
-</tr>
-</table>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_centos8elk环境配置">15.2. CentOS8+ELK环境配置</h3>
-<div class="sect3">
-<h4 id="_安装elk">15.2.1. 安装ELK</h4>
-<div class="paragraph">
-<p>同 <a href="#_centos7elk环境配置">CentOS7+ELK环境配置</a></p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_logstash">15.2.2. Logstash</h4>
-<div class="paragraph">
-<p><span class="red">“如何将Nginx的Web日志导入Elasticsearch？”</span></p>
-</div>
-<div class="sect4">
-<h5 id="_日志处理管道">日志处理管道</h5>
-<div class="paragraph">
-<p>日志记录增加到Elasticsearch时，需要使用管道实时清洗、处理日志格式。</p>
-</div>
-<div class="listingblock">
-<div class="title">Nginx日志格式</div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">log_format  main  '$host $remote_addr - $remote_user [$time_local] "$request" '
-                    '$status $body_bytes_sent "$http_referer" '
-                    '"$http_user_agent" "$http_x_forwarded_for"';</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>执行以下命令，在Elasticsearch中增加管道：</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl -H "Content-Type: application/json" -X PUT http://0.0.0.0:9200/_ingest/pipeline/web_log -d '
-{
-    "description": "",
-    "processors": [
-        {
-            "dissect": {
-                "field": "message",
-                "pattern": "%{domain} %{server_port} %{client_ip} - - [%{web_timestamp}] \"%{method} %{uri} HTTP/%{version}\" %{status} %{response_time} %{body_bytes} \"%{referer}\" \"%{user_agent}\" \"%{x_forwarded_for}\" %{server_ip}"
-            }
-        },
-        {
-            "grok": {
-                "field": "uri",
-                "on_failure": [
-                    {
-                "set": {
-                    "field": "ext",
-                    "value": ""
-                }
-                    },
-                    {
-                "set": {
-                    "field": "url_base",
-                    "value": "{{uri}}"
-                }
-                    }
-                ],
-                "patterns": [
-                    "%{GREEDYDATA:url_base}\\.%{WORD:ext}"
-                ]
-            }
-        },
-        {
-            "geoip": {
-                "field": "client_ip",
-                "target_field": "client_ip_geo"
-            }
-        },
-        {
-            "geoip": {
-                "field": "server_ip",
-                "target_field": "server_ip_geo"
-            }
-        },
-        {
-            "user_agent": {
-                "field": "user_agent"
-            }
-        },
-        {
-            "date": {
-                "field": "web_timestamp",
-                "target_field": "@timestamp",
-                "formats": [
-                    "dd/MMM/yyyy:HH:mm:ss Z"
-                ],
-                "timezone" : "Asia/Shanghai"
-            }
-        },
-        {
-            "convert": {
-                "field": "server_port",
-                "type": "integer"
-            }
-        },
-        {
-            "convert": {
-                "field": "status",
-                "type": "integer"
-            }
-        },
-        {
-            "convert": {
-                "field": "response_time",
-                "type": "float"
-            }
-        },
-        {
-            "convert": {
-                "field": "body_bytes",
-                "type": "integer"
-            }
-        },
-        {
-            "set": {
-                "field": "hour_of_day",
-                "value": 12
-            }
-        },
-        {
-            "grok": {
-                "field": "web_timestamp",
-                "patterns": [
-                    "\\d+/\\w+/\\d+:%{NUMBER:hour_of_day:int}:\\d+:\\d+ \\+\\d+"
-                ]
-            }
-        }
-    ]
-}
-'</code></pre>
-</div>
-</div>
-</div>
-<div class="sect4">
-<h5 id="_准备日志文件">准备日志文件</h5>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">日志文件存放路径</dt>
-<dd>
-<p>~/es_log/nginx_logs</p>
-</dd>
-</dl>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-console hljs" data-lang="console">[root@dell7 nginx_logs]# ls
-access.log-20200501  access.log-20200512  access.log-20200523  access.log-20200603
-access.log-20200502  access.log-20200513  access.log-20200524  access.log-20200604
-access.log-20200503  access.log-20200514  access.log-20200525  access.log-20200605
-access.log-20200504  access.log-20200515  access.log-20200526  access.log-20200606
-access.log-20200505  access.log-20200516  access.log-20200527  access.log-20200607
-access.log-20200506  access.log-20200517  access.log-20200528  access.log-20200608
-access.log-20200507  access.log-20200518  access.log-20200529  access.log-20200609
-access.log-20200508  access.log-20200519  access.log-20200530  access.log-20200610
-access.log-20200509  access.log-20200520  access.log-20200531
-access.log-20200510  access.log-20200521  access.log-20200601
-access.log-20200511  access.log-20200522  access.log-20200602</code></pre>
-</div>
-</div>
-</div>
-<div class="sect4">
-<h5 id="_配置文件">配置文件</h5>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mkdir -p ~/es_log
-
-cat &lt;&lt; EOF &gt; ~/es_log/logstash.conf
-input{
-  file {
-    # https://www.elastic.co/guide/en/logstash/current/plugins-inputs-file.html#plugins-inputs-file-delimiter
-    # 默认以"\n"分割，文件必须至少一个换行符
-    path =&gt; "${HOME}/es_log/nginx_logs/access.log*"
-    start_position =&gt; "end"
-    stat_interval =&gt; "1 second"
-  }
-}
-output{
-    elasticsearch {
-            #这里可以是数组，可以是多个节点的地址，会自动启用负载均衡
-            hosts =&gt; ["0.0.0.0:9200"]
-            index =&gt; "foo_com"
-            pipeline =&gt; "web_log"
-    }
-    #file  {
-    #    path =&gt; "/var/log/logstash.log"
-    #    codec =&gt; json
-    #}
-}
-EOF</code></pre>
-</div>
-</div>
-<div class="admonitionblock important">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-important" title="Important"></i>
-</td>
-<td class="content">
-<div class="paragraph">
-<p>如果Elasticsearch的 <code>"network.host"</code> 参数值为具体的IP地址，比如 <code>"172.24.109.12"</code>。</p>
-</div>
-<div class="paragraph">
-<p>那么，Logstash配置中的 <code>output.elasticsearch.hosts</code> 需要设置为 <code>["172.24.109.12:9200"]</code>。</p>
-</div>
-</td>
-</tr>
-</table>
-</div>
-</div>
-<div class="sect4">
-<h5 id="_导入nginx日志到elasticsearch">导入Nginx日志到Elasticsearch</h5>
-<div class="paragraph">
-<p>导入数据到ES：</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">/usr/share/logstash/bin/logstash -f ~/es_log/logstash.conf</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>每次运行的结果会记录到文件：</p>
-</div>
-<div class="paragraph">
-<p>/usr/share/logstash/data/plugins/inputs/file/.sincedb_100caf6f694120ba2483577719e4a564</p>
-</div>
-<div class="paragraph">
-<p>文件内容为：</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">270004749 0 2049 584450300 1592393767.626652 /root/es_log/nginx_logs/access.log-20200501
-272281186 0 2049 471367497 1592394059.861428 /root/es_log/nginx_logs/access.log-20200502</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>如果想重新导入，删除 .sincedb 文件即可。</p>
-</div>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_elasticstack使用教程">15.3. ElasticStack使用教程</h3>
-<div class="paragraph">
-<p>我们以 <code>wecompany</code> 公司的员工信息管理为例来学习 <code>Elasticsearch</code> 中的基本操作。</p>
-</div>
-<div class="sect3">
-<h4 id="_索引文档">15.3.1. 索引文档</h4>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">向名称为 <code>wecompany</code> 的索引中添加类型为 <code>employee</code> 的3个员工信息的文档</dt>
-</dl>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl -H "Content-Type: application/json" -X PUT 'http://localhost:9200/wecompany/employee/1?pretty' -d '
-{
-    "first_name" : "John",
-    "last_name" :  "Smith",
-    "age" :        25,
-    "about" :      "I love to go rock climbing",
-    "interests": [ "sports", "music" ]
-}
-'
-
-curl -H "Content-Type: application/json" -X PUT 'http://localhost:9200/wecompany/employee/2?pretty' -d '
-{
-    "first_name" :  "Jane",
-    "last_name" :   "Smith",
-    "age" :         32,
-    "about" :       "I like to collect rock albums",
-    "interests":  [ "music" ]
-}
-'
-
-curl -H "Content-Type: application/json" -X PUT 'http://localhost:9200/wecompany/employee/3?pretty' -d '
-{
-    "first_name" :  "Douglas",
-    "last_name" :   "Fir",
-    "age" :         35,
-    "about":        "I like to build cabinets",
-    "interests":  [ "forestry" ]
-}
-'</code></pre>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_搜索">15.3.2. 搜索</h4>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">获取ID为1的文档</dt>
-<dd>
-<p><code>curl -X GET 'http://localhost:9200/wecompany/employee/1?pretty'</code></p>
-</dd>
-</dl>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "_index" : "wecompany",
-  "_type" : "employee",
-  "_id" : "1",
-  "_version" : 1,
-  "found" : true,
-  "_source" : {
-    "first_name" : "John",
-    "last_name" : "Smith",
-    "age" : 25,
-    "about" : "I love to go rock climbing",
-    "interests" : [
-      "sports",
-      "music"
-    ]
-  }
-}</code></pre>
-</div>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">搜索姓氏为 <code>Smith</code> 的员工信息</dt>
-<dd>
-<p><code>curl -X GET 'http://localhost:9200/wecompany/employee/_search?q=last_name:Smith&amp;pretty'</code></p>
-</dd>
-</dl>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "took" : 204,
-  "timed_out" : false,
-  "_shards" : {
-    "total" : 5,
-    "successful" : 5,
-    "skipped" : 0,
-    "failed" : 0
-  },
-  "hits" : {
-    "total" : 2,
-    "max_score" : 0.2876821,
-    "hits" : [
-      {
-        "_index" : "wecompany",
-        "_type" : "employee",
-        "_id" : "2",
-        "_score" : 0.2876821,
-        "_source" : {
-          "first_name" : "Jane",
-          "last_name" : "Smith",
-          "age" : 32,
-          "about" : "I like to collect rock albums",
-          "interests" : [
-            "music"
-          ]
-        }
-      },
-      {
-        "_index" : "wecompany",
-        "_type" : "employee",
-        "_id" : "1",
-        "_score" : 0.2876821,
-        "_source" : {
-          "first_name" : "John",
-          "last_name" : "Smith",
-          "age" : 25,
-          "about" : "I love to go rock climbing",
-          "interests" : [
-            "sports",
-            "music"
-          ]
-        }
-      }
-    ]
-  }
-}</code></pre>
-</div>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">使用查询表达式搜索姓氏为Smith的员工信息</dt>
-</dl>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl -H "Content-Type: application/json" -X GET 'http://localhost:9200/wecompany/employee/_search?pretty' -d '
-{
-    "query" :  {
-        "match" : {
-            "last_name" : "Smith"
-        }
-    }
-}
-'</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>返回结果同上</pre>
-</div>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">姓氏为Smith且年龄大于30的复杂条件搜索员工信息</dt>
-</dl>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl -H "Content-Type: application/json" -X GET 'http://localhost:9200/wecompany/employee/_search?pretty' -d '
-{
-    "query": {
-        "bool": {
-            "must": {
-                "match": {
-                    "last_name": "smith"
-                }
-            },
-            "filter": {
-                "range": {
-                    "age": {
-                        "gt": 30
-                    }
-                }
-            }
-        }
-    }
-}
-'</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "took" : 39,
-  "timed_out" : false,
-  "_shards" : {
-    "total" : 5,
-    "successful" : 5,
-    "skipped" : 0,
-    "failed" : 0
-  },
-  "hits" : {
-    "total" : 1,
-    "max_score" : 0.2876821,
-    "hits" : [
-      {
-        "_index" : "wecompany",
-        "_type" : "employee",
-        "_id" : "2",
-        "_score" : 0.2876821,
-        "_source" : {
-          "first_name" : "Jane",
-          "last_name" : "Smith",
-          "age" : 32,
-          "about" : "I like to collect rock albums",
-          "interests" : [
-            "music"
-          ]
-        }
-      }
-    ]
-  }
-}</code></pre>
-</div>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">全文搜索喜欢攀岩（rock climbing）的员工信息</dt>
-</dl>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl -H "Content-Type: application/json" -X GET 'http://localhost:9200/wecompany/employee/_search?pretty' -d '
-{
-    "query" :  {
-        "match" : {
-            "about" : "rock climbing"
-        }
-    }
-}
-'</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "took" : 10,
-  "timed_out" : false,
-  "_shards" : {
-    "total" : 5,
-    "successful" : 5,
-    "skipped" : 0,
-    "failed" : 0
-  },
-  "hits" : {
-    "total" : 2,
-    "max_score" : 0.5753642,
-    "hits" : [
-      {
-        "_index" : "wecompany",
-        "_type" : "employee",
-        "_id" : "1",
-        "_score" : 0.5753642,
-        "_source" : {
-          "first_name" : "John",
-          "last_name" : "Smith",
-          "age" : 25,
-          "about" : "I love to go rock climbing",
-          "interests" : [
-            "sports",
-            "music"
-          ]
-        }
-      },
-      {
-        "_index" : "wecompany",
-        "_type" : "employee",
-        "_id" : "2",
-        "_score" : 0.2876821,
-        "_source" : {
-          "first_name" : "Jane",
-          "last_name" : "Smith",
-          "age" : 32,
-          "about" : "I like to collect rock albums",
-          "interests" : [
-            "music"
-          ]
-        }
-      }
-    ]
-  }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>此外，将上述请求中的 <code>match</code> 换成 <code>match_phrase</code> 可以精确匹配短语 <code>rock climbing</code> 的结果。在 <code>query</code> 同级添加 <code>highlight</code> 参数可以在结果中用 <code>&lt;em&gt;&lt;/em&gt;</code> 标签标注匹配的关键词:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>{
-"query" :{ ... }
-    "highlight" : {
-            "fields" : {
-                "about" : {}
-            }
-        }
-}</pre>
-</div>
-</div>
-<div class="sect4">
-<h5 id="_短语搜索">短语搜索</h5>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">GET /megacorp/employee/_search
-{
-  "query": {
-    "match_phrase": {
-      "about": "rock climbing"
-    }
-  }
-}</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  ...
-  "hits": {
-    "total": 1,
-    "max_score": 0.23013961,
-    "hits": [
-      {
-        ...
-        "_score": 0.23013961,
-        "_source": {
-          "first_name": "John",
-          "last_name": "Smith",
-          "age": 25,
-          "about": "I love to go rock climbing",
-          "interests": [
-            "sports",
-            "music"
-          ]
-        }
-      }
-    ]
-  }
-}</code></pre>
-</div>
-</div>
-</div>
-<div class="sect4">
-<h5 id="_高亮我们的搜索">高亮我们的搜索</h5>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">GET /megacorp/employee/_search
-{
-  "query": {
-    "match_phrase": {
-      "about": "rock climbing"
-    }
-  },
-  "highlight": {
-    "fields": {
-      "about": {}
-    }
-  }
-}</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  ...
-  "hits": {
-    "total": 1,
-    "max_score": 0.23013961,
-    "hits": [
-      {
-        ...
-        "_score": 0.23013961,
-        "_source": {
-          "first_name": "John",
-          "last_name": "Smith",
-          "age": 25,
-          "about": "I love to go rock climbing",
-          "interests": [
-            "sports",
-            "music"
-          ]
-        },
-        "highlight": {
-          "about": [
-            "I love to go &lt;em&gt;rock&lt;/em&gt; &lt;em&gt;climbing&lt;/em&gt;"
-          ]
-        }
-      }
-    ]
-  }
-}</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_聚合">15.3.3. 聚合</h4>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">查询聚合结果</dt>
-</dl>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl -H "Content-Type: application/json" -X GET 'http://localhost:9200/wecompany/employee/_search?pretty' -d '
-{
-    "aggs": {
-        "all_interests": {
-            "terms": { "field": "interests.keyword" }
-        }
-    }
-}
-'</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "took" : 72,
-  "timed_out" : false,
-  "_shards" : {
-    "total" : 5,
-    "successful" : 5,
-    "skipped" : 0,
-    "failed" : 0
-  },
-  "hits" : {
-    "total" : 3,
-    "max_score" : 1.0,
-    "hits" : [
-      {
-        "_index" : "wecompany",
-        "_type" : "employee",
-        "_id" : "2",
-        "_score" : 1.0,
-        "_source" : {
-          "first_name" : "Jane",
-          "last_name" : "Smith",
-          "age" : 32,
-          "about" : "I like to collect rock albums",
-          "interests" : [
-            "music"
-          ]
-        }
-      },
-      {
-        "_index" : "wecompany",
-        "_type" : "employee",
-        "_id" : "1",
-        "_score" : 1.0,
-        "_source" : {
-          "first_name" : "John",
-          "last_name" : "Smith",
-          "age" : 25,
-          "about" : "I love to go rock climbing",
-          "interests" : [
-            "sports",
-            "music"
-          ]
-        }
-      },
-      {
-        "_index" : "wecompany",
-        "_type" : "employee",
-        "_id" : "3",
-        "_score" : 1.0,
-        "_source" : {
-          "first_name" : "Douglas",
-          "last_name" : "Fir",
-          "age" : 35,
-          "about" : "I like to build cabinets",
-          "interests" : [
-            "forestry"
-          ]
-        }
-      }
-    ]
-  },
-  "aggregations" : {
-    "all_interests" : {
-      "doc_count_error_upper_bound" : 0,
-      "sum_other_doc_count" : 0,
-      "buckets" : [
-        {
-          "key" : "music",
-          "doc_count" : 2
-        },
-        {
-          "key" : "forestry",
-          "doc_count" : 1
-        },
-        {
-          "key" : "sports",
-          "doc_count" : 1
-        }
-      ]
-    }
-  }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>我们可以看到两个职员对音乐有兴趣,一个喜欢林学,一个喜欢运动。这些数据并没有被预先计算好,它们是实时的从匹配查询语句的文档中动态计算生成的。如果我们想知道所有姓"Smith"的人最大的共同点(兴趣爱好),我们只需要增加合适的语句既可:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">GET /megacorp/employee/_search
-{
-  "query": {
-    "match": {
-      "last_name": "smith"
-    }
-  },
-  "aggs": {
-    "all_interests": {
-      "terms": {
-        "field": "interests.keyword"
-      }
-    }
-  }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p><code>all_interests</code> 聚合已经变成只包含和查询语句相匹配的文档了:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-josn hljs" data-lang="josn">{
-  ...
-  "hits": {
-    ...
-  },
-  "aggregations": {
-    "all_interests": {
-      "buckets": [
-        {
-          "key": "music",
-          "doc_count": 2
-        {
-          "key": "sports",
-          "doc_count": 1
-        }
-      ]
-    }
-  }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>聚合也允许分级汇总。例如,让我们统计每种兴趣下职员的平均年龄:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">GET /megacorp/employee/_search
-{
-  "aggs": {
-    "all_interests": {
-      "terms": {
-        "field": "interests.keyword"
-      },
-      "aggs": {
-        "avg_age": {
-          "avg": {
-            "field": "age"
-          }
-        }
-      }
-    }
-  }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>虽然这次返回的聚合结果有些复杂,但任然很容易理解:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  ...
-  "hits": {
-    ...
-  },
-  "all_interests": {
-    "buckets": [
-      {
-        "key": "music",
-        "doc_count": 2,
-        "avg_age": {
-          "value": 28.5
-        }
-      },
-      {
-        "key": "forestry",
-        "doc_count": 1,
-        "avg_age": {
-          "value": 35
-        }
-      },
-      {
-        "key": "sports",
-        "doc_count": 1,
-        "avg_age": {
-          "value": 25
-        }
-      }
-    ]
-  }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>该聚合结果比之前的聚合结果要更加丰富。我们依然得到了兴趣以及数量(指具有该兴趣的员工人数)的列表,但是现在每个兴趣额外拥有 <code>avg_age</code> 字段来显示具有该兴趣员工的平均年龄。</p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_更新文档">15.3.4. 更新文档</h4>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">更新ID为2的文档，只需再次PUT即可</dt>
-</dl>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl -H "Content-Type: application/json" -X PUT 'http://localhost:9200/wecompany/employee/2?pretty' -d '
-{
-    "first_name" :  "Jane",
-    "last_name" :   "Smith",
-    "age" :         33,
-    "about" :       "I like to collect rock albums",
-    "interests":  [ "music" ]
-}
-'</code></pre>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_删除文档">15.3.5. 删除文档</h4>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl -H "Content-Type: application/json" -X DELETE 'http://localhost:9200/wecompany/employee/1?pretty'</code></pre>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_结构化查询">15.3.6. 结构化查询</h4>
-<div class="sect4">
-<h5 id="_最重要的查询过滤语句">最重要的查询过滤语句</h5>
-<div class="sect5">
-<h6 id="_term_查询">term 查询</h6>
-<div class="paragraph">
-<p>term 主要用于精确匹配哪些值,比如数字,日期,布尔值或 not_analyzed的字符串(未经分析的文本数据类型):</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>{ "term": { "age": 26}}
-{ "term": { "date": "2014-09-01" }}
-{ "term": { "public": true }}
-{ "term": { "tag": "full_text"}}</pre>
-</div>
-</div>
-</div>
-<div class="sect5">
-<h6 id="_terms_查询">terms 查询</h6>
-<div class="paragraph">
-<p><code>terms</code> 跟 <code>terms</code> 过滤有点类似,但 <code>terms</code> 允许指定多个匹配条件。 如果某个字段指定了多个值,那么文档需要一起去做匹配:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "terms": {
-    "tag": [
-      "search",
-      "full_text",
-      "nosql"
-    ]
-  }
-}</code></pre>
-</div>
-</div>
-</div>
-<div class="sect5">
-<h6 id="_range_过滤">range 过滤</h6>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "range": {
-    "age": {
-      "gte": 20,
-      "lt": 30
-    }
-  }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>范围操作符包含:</p>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">gt</dt>
-<dd>
-<p>大于</p>
-</dd>
-<dt class="hdlist1">gte</dt>
-<dd>
-<p>大于等于</p>
-</dd>
-<dt class="hdlist1">lt</dt>
-<dd>
-<p>小于</p>
-</dd>
-<dt class="hdlist1">lte</dt>
-<dd>
-<p>小于等于</p>
-</dd>
-</dl>
-</div>
-</div>
-<div class="sect5">
-<h6 id="_exists_和_missing_过滤">exists 和 missing 过滤</h6>
-<div class="paragraph">
-<p><code>exists</code> 和 <code>missing</code> 过滤SQL语句中的过滤可以用于查找文档中是否包含指定字段或没有某个字段,类似于 <code>IS_NULL</code> 条件</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "exists": {
-    "field": "title"
-  }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>这两个过滤只是针对已经查出一批数据来,但是想区分出某个字段是否存在的时候使用。</p>
-</div>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_dsl查询实例">15.3.7. DSL查询实例</h4>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "query": {
-    "match": {
-      "tweet": "elasticsearch"
-    }
-  }
-}</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "bool": {
-    "must": {
-      "match": {
-        "tweet": "elasticsearch"
-      }
-    },
-    "must_not": {
-      "match": {
-        "name": "mary"
-      }
-    },
-    "should": {
-      "match": {
-        "tweet": "full text"
-      }
-    }
-  }
-}</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
-  "bool": {
-    "must": {
-      "match": {
-        "email": "business opportunity"
-      }
-    },
-    "should": [
-      {
-        "match": {
-          "starred": true
-        }
-      },
-      {
-        "bool": {
-          "must": {
-            "folder": "inbox"
-          },
-          "must_not": {
-            "spam": true
-          }
-        }
-      }
-    ],
-    "minimum_should_match": 1
-  }
-}</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_从mysql同步数据到elasticsearch">15.4. 从MySQL同步数据到ElasticSearch</h3>
-<div class="paragraph">
-<p>参考文档：</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><a href="https://www.elastic.co/guide/en/logstash/current/plugins-inputs-jdbc.html">Jdbc input plugin</a></p>
-</li>
-<li>
-<p><a href="https://www.elastic.co/guide/en/logstash/current/plugins-outputs-elasticsearch.html">Elasticsearch output plugin</a></p>
-</li>
-</ul>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">/usr/share/logstash/bin/logstash-plugin install logstash-input-jdbc
-
-wget -O /usr/share/logstash/lib/mysql-connector-java-8.0.18.jar https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.18/mysql-connector-java-8.0.18.jar
-
-[ ! -d "/data/redas_meta_sync" ] &amp;&amp; mkdir /data/redas_meta_sync/logs
-chown -R logstash:logstash /usr/share/logstash/data /data/redas_meta_sync
-
-cat &lt;&lt; EOF &gt;  /data/redas_meta_sync/logstash_mysql_es_.conf
-input{
-	jdbc {
-		# 驱动方式
-		jdbc_driver_library =&gt; "/usr/share/logstash/lib/mysql-connector-java-8.0.18.jar"
-		# 驱动类名
-		jdbc_driver_class =&gt; "com.mysql.cj.jdbc.Driver"
-		# mysql 数据库链接,blog为数据库名 &amp;useSSL=false 这个是为了防止不支持ssl连接的问题
-		jdbc_connection_string =&gt; "jdbc:mysql://localhost:3306/redas?serverTimezone=Asia/Shanghai&amp;useUnicode=yes&amp;characterEncoding=UTF-8"
-		# 连接数据库用户名
-		jdbc_user =&gt; "redas"
-		# 连接数据库密码
-		jdbc_password =&gt; "geek"
-		# 是否启用分页
-		jdbc_paging_enabled =&gt; "true"
-		jdbc_page_size =&gt; "50000"
-		# 设置监听间隔  各字段含义（由左至右）分、时、天、月、年，全部为*默认含&gt;义为每分钟都更新
-		schedule =&gt; "*/1 * * * * "
-		# 直接写sql语句用这个
-		statement =&gt; "select `id`, `content` from `recr_page_storage` where id &gt; :sql_last_value order by id"
-		# 是否需要记录某个column 的值,如果 record_last_run 为真,可以自定义我们需要 track 的 column 名称，此时该参数就要为 true. 否则默认 track 的是 timestamp 的值
-		use_column_value =&gt; true
-		# 是否记录上次执行结果, 如果为真,将会把上次执行到的 tracking_column 字段的值记录下来,保存到 last_run_metadata_path 指定的文件中
-		record_last_run =&gt; true
-		# 如果 use_column_value 为真,需配置此参数. track 的数据库 column 名,该 column 必须是递增的.比如：ID.
-		tracking_column_type =&gt; "numeric"
-		tracking_column =&gt; "id"
-		# 保存上一次运行&gt;的信息(tracking_column)
-		last_run_metadata_path =&gt; "/data/redas_meta_sync/last_run.txt"
-		# 是否清除 last_run_metadata_path 的记录,如果为真那么每次都相当于从头开始查询所有的数据库记录
-		clean_run =&gt; false
-	}
-}
-filter {
-      json {
-        source =&gt; "content"
-        remove_field =&gt; "content"
-      }
-}
-output{
-	elasticsearch {
-		#这里可以是数组，可以是多个节点的地址，会自动启用负载均衡
-		hosts =&gt; ["127.0.0.1:9200"]
-		index =&gt; "redas_test"
-		# 将表Iid作为ES的主键，防止数据重复
-		document_id =&gt; "%{id}"
-	}
-	file {
-		path =&gt; "/data/redas_meta_sync/logs/%{+YYYY-MM-dd}.log"
-		codec =&gt; json_lines
-	}
-}
-EOF
-
-cat &lt;&lt; EOF &gt; /usr/lib/systemd/system/redas_meta_sync.service
-[Unit]
-Description=Redas Position Infomation Auto-Sync to ElasticSearch
-After=network.target remote-fs.target nss-lookup.target mysqld.service elasticsearch.service
-
-[Service]
-Type=simple
-User=logstash
-Group=logstash
-WorkingDirectory=/data/redas_meta_sync
-ExecStart=/usr/share/logstash/bin/logstash -f /data/redas_meta_sync/logstash_mysql_es_.conf -l /data/redas_meta_sync/logs --path.settings /etc/logstash
-StandardOutput=null
-StandardError=null
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-systemctl enable redas_meta_sync
-systemctl start redas_meta_sync</code></pre>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_elasticsearch在线迁移">15.5. ElasticSearch在线迁移</h3>
-<div class="paragraph">
-<p>参考文档：</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><a href="https://www.elastic.co/guide/en/logstash/current/plugins-inputs-elasticsearch.html">Elasticsearch input plugin</a></p>
-</li>
-<li>
-<p><a href="https://www.elastic.co/guide/en/logstash/current/plugins-outputs-elasticsearch.html">Elasticsearch output plugin</a></p>
-</li>
-</ul>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cat &lt;&lt; EOF &gt; transfer_es.conf
-input {
-	elasticsearch {
-		hosts =&gt; ["http://192.168.2.4:9200"]
-		index =&gt; "*"
-		docinfo =&gt; true
-	}
-}
-output {
-	elasticsearch {
-		hosts =&gt; ["http://127.0.0.1:9200"]
-		index =&gt; "%{[@metadata][_index]}"
-	}
-}
-EOF
-
-/usr/share/logstash/bin/logstash -f transfer_es.conf</code></pre>
-</div>
-</div>
-<div style="page-break-after: always;"></div>
 </div>
 </div>
 </div>
