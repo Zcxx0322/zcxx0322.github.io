@@ -4285,7 +4285,7 @@ Complete!</pre>
 </div>
 </div>
 <div class="sect4">
-<h5 id="_生成kibana连接token">生成kibana连接token</h5>
+<h5 id="_为kibana生成token">为kibana生成token</h5>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">/usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s kibana</code></pre>
@@ -4309,7 +4309,7 @@ eyJ2ZXIiOiI4LjEwLjQiLCJhZHIiOlsiMTkyLjE2OC4xMjIuMjA4OjkyMDAiXSwiZmdyIjoiOTE0MmU5
 <div class="listingblock">
 <div class="title">终端输出</div>
 <div class="content">
-<pre>[root@node02 ~]# /usr/share/kibana/bin/kibana-setup --enrollment-token eyJ2ZXIiOiI4LjEwLjQiLCJhZHIiOlsiMTkyLjE2OC4xMjIuMjA4OjkyMDAiXSwiZmdyIjoiOTE0MmU5NDc4NTc2YWViNmZlMzcwNzNlMDliYjFlYTliMWUwZGVhYzY1OTdlZDI1ZTA0M2RlZDc3MjQwM2ZkZCIsImtleSI6IldzWXVjSXNCZzdFazJYSmU5Um5COjdncXp2alppUVpPUjFYb1IzUWVuMUEifQ==
+<pre>[root@node01 ~]# /usr/share/kibana/bin/kibana-setup --enrollment-token eyJ2ZXIiOiI4LjEwLjQiLCJhZHIiOlsiMTkyLjE2OC4xMjIuMjA4OjkyMDAiXSwiZmdyIjoiOTE0MmU5NDc4NTc2YWViNmZlMzcwNzNlMDliYjFlYTliMWUwZGVhYzY1OTdlZDI1ZTA0M2RlZDc3MjQwM2ZkZCIsImtleSI6IldzWXVjSXNCZzdFazJYSmU5Um5COjdncXp2alppUVpPUjFYb1IzUWVuMUEifQ==
 
 ✔ Kibana configured successfully.
 
@@ -4328,6 +4328,14 @@ To start Kibana run:
 server.host: "0.0.0.0"
 server.publicBaseUrl: "http://node01:5601/"
 server.name: "node01"</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_启动kibana">启动kibana</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">systemctl enable --now kibana</code></pre>
 </div>
 </div>
 </div>
