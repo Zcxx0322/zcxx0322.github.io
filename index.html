@@ -4210,7 +4210,7 @@ EOF</code></pre>
 <h5 id="_安装elasticsearch">安装Elasticsearch</h5>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">yum install -y elastiocsearch</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">yum install -y elasticsearch</code></pre>
 </div>
 </div>
 <div class="listingblock">
@@ -4269,6 +4269,20 @@ Complete!</pre>
 </div>
 </div>
 <div class="sect4">
+<h5 id="_配置elasticsearch">配置Elasticsearch</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">vim /etc/elasticsearch/elasticsearch.yml
+
+......
+cluster.name: myapp
+node.name: ${HOSTNAME}
+network.host: 0.0.0.0
+......</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
 <h5 id="_启动elasticsearch">启动Elasticsearch</h5>
 <div class="listingblock">
 <div class="content">
@@ -4303,7 +4317,7 @@ eyJ2ZXIiOiI4LjEwLjQiLCJhZHIiOlsiMTkyLjE2OC4xMjIuMjA4OjkyMDAiXSwiZmdyIjoiOTE0MmU5
 <h5 id="_通过token初始化kibana">通过token初始化kibana</h5>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">/usr/share/kibana/bin/kibana-setup --enrollment-token eyJ2ZXIiOiI4LjEwLjQiLCJhZHIiOlsiMTkyLjE2OC4xMjIuMjA4OjkyMDAiXSwiZmdyIjoiOTE0MmU5NDc4NTc2YWViNmZlMzcwNzNlMDliYjFlYTliMWUwZGVhYzY1OTdlZDI1ZTA0M2RlZDc3MjQwM2ZkZCIsImtleSI6IldzWXVjSXNCZzdFazJYSmU5Um5COjdncXp2alppUVpPUjFYb1IzUWVuMUEifQ==</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">/usr/share/kibana/bin/kibana-setup --enrollment-token &lt;token&gt;</code></pre>
 </div>
 </div>
 <div class="listingblock">
@@ -4327,7 +4341,14 @@ To start Kibana run:
 #在配置文件中修改相关项
 server.host: "0.0.0.0"
 server.publicBaseUrl: "http://node01:5601/"
-server.name: "node01"</code></pre>
+server.name: "node01"
+
+......
+# This section was automatically generated during setup.
+elasticsearch.hosts: ['http://192.168.122.69:9200']
+elasticsearch.serviceAccountToken: AAEAAWVsYXN0aWMva2liYW5hL2Vucm9sbC1wcm9jZXNzLXRva2VuLTE2OTg3MTgyNTY1ODU6d3BQREZPVnRSRHVsWWZBX2hUMVBLUQ
+elasticsearch.ssl.certificateAuthorities: [/var/lib/kibana/ca_1698718257998.crt]
+xpack.fleet.outputs: [{id: fleet-default-output, name: default, is_default: true, is_default_monitoring: true, type: elasticsearch, hosts: ['http://192.168.122.69:9200'], ca_trusted_fingerprint: 34a3598e22f7822e5f63015e05dfc1d0c0cddf9f08ccaab623f0f44717329624}]</code></pre>
 </div>
 </div>
 </div>
