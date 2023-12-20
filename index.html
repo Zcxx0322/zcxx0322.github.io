@@ -898,25 +898,19 @@ p { margin-bottom: 1.25rem; }
 <li><a href="#_安装jenkins">7.2.2. 安装jenkins</a></li>
 </ul>
 </li>
-<li><a href="#_配置jenkins服务">7.3. 配置Jenkins服务</a>
+<li><a href="#_为jenkins新增防火墙规则">7.3. 为Jenkins新增防火墙规则</a></li>
+<li><a href="#_启动jenkins">7.4. 启动Jenkins</a></li>
+<li><a href="#_第一次访问jenkins_web">7.5. 第一次访问Jenkins Web</a>
 <ul class="sectlevel3">
-<li><a href="#_开机启动jenkins">7.3.1. 开机启动Jenkins</a></li>
-<li><a href="#_设置jenkins启动参数">7.3.2. 设置Jenkins启动参数</a></li>
-</ul>
-</li>
-<li><a href="#_为jenkins新增防火墙规则">7.4. 为Jenkins新增防火墙规则</a></li>
-<li><a href="#_启动jenkins">7.5. 启动Jenkins</a></li>
-<li><a href="#_第一次访问jenkins_web">7.6. 第一次访问Jenkins Web</a>
-<ul class="sectlevel3">
-<li><a href="#_获取初始管理员密码">7.6.1. 获取初始管理员密码</a></li>
-<li><a href="#_访问jenkins_web">7.6.2. 访问Jenkins Web</a></li>
-<li><a href="#_解锁jenkins">7.6.3. 解锁Jenkins</a></li>
-<li><a href="#_选择插件">7.6.4. 选择插件</a></li>
-<li><a href="#_安装插件">7.6.5. 安装插件</a></li>
-<li><a href="#_创建第一个管理员用户">7.6.6. 创建第一个管理员用户</a></li>
-<li><a href="#_配置url">7.6.7. 配置URL</a></li>
-<li><a href="#_配置完成">7.6.8. 配置完成</a></li>
-<li><a href="#_jenkins首页">7.6.9. Jenkins首页</a></li>
+<li><a href="#_获取初始管理员密码">7.5.1. 获取初始管理员密码</a></li>
+<li><a href="#_访问jenkins_web">7.5.2. 访问Jenkins Web</a></li>
+<li><a href="#_解锁jenkins">7.5.3. 解锁Jenkins</a></li>
+<li><a href="#_选择插件">7.5.4. 选择插件</a></li>
+<li><a href="#_安装插件">7.5.5. 安装插件</a></li>
+<li><a href="#_创建第一个管理员用户">7.5.6. 创建第一个管理员用户</a></li>
+<li><a href="#_配置url">7.5.7. 配置URL</a></li>
+<li><a href="#_配置完成">7.5.8. 配置完成</a></li>
+<li><a href="#_jenkins首页">7.5.9. Jenkins首页</a></li>
 </ul>
 </li>
 </ul>
@@ -2235,11 +2229,8 @@ systemctl enable zabbix-server zabbix-agent httpd php-fpm</code></pre>
 <h4 id="_导入仓库密钥">7.1.2. 导入仓库密钥</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#下载密钥文件
-wget -O /etc/pki/rpm-gpg/RPM-GPG-KEY-JENKINS https://pkg.jenkins.io/redhat/jenkins.io.key
-
-#导入密钥
-rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-JENKINS</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#导入仓库密钥
+rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key</code></pre>
 </div>
 </div>
 </div>
@@ -2294,39 +2285,7 @@ java -version</code></pre>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_配置jenkins服务">7.3. 配置Jenkins服务</h3>
-<div class="sect3">
-<h4 id="_开机启动jenkins">7.3.1. 开机启动Jenkins</h4>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">systemctl enable jenkins</code></pre>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_设置jenkins启动参数">7.3.2. 设置Jenkins启动参数</h4>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#创建Systemd配置文件
-
-mkdir -p /etc/systemd/system/jenkins.service.d/
-
-cat &lt;&lt; EOF &gt; /etc/systemd/system/jenkins.service.d/override.conf
-[Service]
-Environment="JENKINS_PORT=8282"
-# 默认配置文件中的 %C 实际并未生效，而是出现了错误的 "/var/lib/jenkins/%C/jenkins/"
-Environment="JENKINS_WEBROOT=/var/cache/jenkins/war"
-Environment="JENKINS_LOG=/var/log/jenkins/jenkins.log"
-EOF
-
-#重载Systemd配置
-systemctl daemon-reload</code></pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_为jenkins新增防火墙规则">7.4. 为Jenkins新增防火墙规则</h3>
+<h3 id="_为jenkins新增防火墙规则">7.3. 为Jenkins新增防火墙规则</h3>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#增加防火墙放行规则
@@ -2362,7 +2321,7 @@ firewall-cmd --list-all</code></pre>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_启动jenkins">7.5. 启动Jenkins</h3>
+<h3 id="_启动jenkins">7.4. 启动Jenkins</h3>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -2377,7 +2336,10 @@ firewall-cmd --list-all</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#启动Jenkins
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#开机启动Jenkins
+systemctl enable jenkins
+
+#启动Jenkins
 systemctl start jenkins
 
 #查看Jenkins状态
@@ -2386,9 +2348,9 @@ systemctl status jenkins</code></pre>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_第一次访问jenkins_web">7.6. 第一次访问Jenkins Web</h3>
+<h3 id="_第一次访问jenkins_web">7.5. 第一次访问Jenkins Web</h3>
 <div class="sect3">
-<h4 id="_获取初始管理员密码">7.6.1. 获取初始管理员密码</h4>
+<h4 id="_获取初始管理员密码">7.5.1. 获取初始管理员密码</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cat /var/lib/jenkins/secrets/initialAdminPassword</code></pre>
@@ -2396,7 +2358,7 @@ systemctl status jenkins</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_访问jenkins_web">7.6.2. 访问Jenkins Web</h4>
+<h4 id="_访问jenkins_web">7.5.2. 访问Jenkins Web</h4>
 <div class="listingblock">
 <div class="title">操作位置:开发工作机(如本机Arch Linux)</div>
 <div class="content">
@@ -2406,7 +2368,7 @@ http://jenkins.sjx.com:8282</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_解锁jenkins">7.6.3. 解锁Jenkins</h4>
+<h4 id="_解锁jenkins">7.5.3. 解锁Jenkins</h4>
 <div class="paragraph">
 <p>输入获取初始管理员密码看到的密码,解锁Jenkins:</p>
 </div>
@@ -2417,7 +2379,7 @@ http://jenkins.sjx.com:8282</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_选择插件">7.6.4. 选择插件</h4>
+<h4 id="_选择插件">7.5.4. 选择插件</h4>
 <div class="paragraph">
 <p>选择安装推荐的插件:</p>
 </div>
@@ -2428,7 +2390,7 @@ http://jenkins.sjx.com:8282</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_安装插件">7.6.5. 安装插件</h4>
+<h4 id="_安装插件">7.5.5. 安装插件</h4>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -2448,7 +2410,7 @@ http://jenkins.sjx.com:8282</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_创建第一个管理员用户">7.6.6. 创建第一个管理员用户</h4>
+<h4 id="_创建第一个管理员用户">7.5.6. 创建第一个管理员用户</h4>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -2468,7 +2430,7 @@ http://jenkins.sjx.com:8282</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_配置url">7.6.7. 配置URL</h4>
+<h4 id="_配置url">7.5.7. 配置URL</h4>
 <div class="paragraph">
 <p>输入 <a href="http://jenkins.sjx.com:8282" class="bare">http://jenkins.sjx.com:8282</a></p>
 </div>
@@ -2479,7 +2441,7 @@ http://jenkins.sjx.com:8282</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_配置完成">7.6.8. 配置完成</h4>
+<h4 id="_配置完成">7.5.8. 配置完成</h4>
 <div class="imageblock">
 <div class="content">
 <img src="images/jenkins6.png" alt="jenkins6">
@@ -2487,7 +2449,7 @@ http://jenkins.sjx.com:8282</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_jenkins首页">7.6.9. Jenkins首页</h4>
+<h4 id="_jenkins首页">7.5.9. Jenkins首页</h4>
 <div class="imageblock">
 <div class="content">
 <img src="images/jenkins7.png" alt="jenkins7">
